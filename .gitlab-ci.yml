@@ -1,0 +1,148 @@
+image: registry.windmaker.net:5005/a-castellano/limani/base_golang_1_15:202104052102
+
+stages:
+    - unit_tests
+    - integration_tests
+    - coverage
+    - report
+    - scan
+    - deploy
+
+unit_tests:
+  stage: unit_tests
+  before_script:
+    - export CC=/usr/bin/clang
+    - export GOPATH="$(pwd)/go"
+    - mkdir -p "$(pwd)/go"
+    - go env -w GOPATH="$(pwd)/go"
+    - mkdir -p $GOPATH/src/github.com/a-castellano
+    - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/security-cam-bot
+    - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
+  script:
+    - echo $GOPATH
+    - pwd
+    - make test
+
+race_detector:
+  stage: unit_tests
+  before_script:
+    - export CC=/usr/bin/clang
+    - export GOPATH="$(pwd)/go"
+    - mkdir -p "$(pwd)/go"
+    - go env -w GOPATH="$(pwd)/go"
+    - mkdir -p $GOPATH/src/github.com/a-castellano
+    - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/security-cam-bot
+    - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
+  script:
+    - make race
+
+memory_sanitizer:
+  stage: unit_tests
+  before_script:
+    - export CC=/usr/bin/clang
+    - export GOPATH="$(pwd)/go"
+    - mkdir -p "$(pwd)/go"
+    - go env -w GOPATH="$(pwd)/go"
+    - mkdir -p $GOPATH/src/github.com/a-castellano
+    - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/security-cam-bot
+    - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
+  script:
+    - make msan
+
+lint_code:
+  stage: unit_tests
+  before_script:
+    - export CC=/usr/bin/clang
+    - export GOPATH="$(pwd)/go"
+    - mkdir -p "$(pwd)/go"
+    - go env -w GOPATH="$(pwd)/go"
+    - mkdir -p $GOPATH/src/github.com/a-castellano
+    - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/security-cam-bot
+    - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
+  script:
+    - make lint
+
+integration_tests:
+  stage: integration_tests
+  services:
+    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202104052102
+      alias: rabbitmq
+  before_script:
+    - export CC=/usr/bin/clang
+    - export GOPATH="$(pwd)/go"
+    - mkdir -p "$(pwd)/go"
+    - go env -w GOPATH="$(pwd)/go"
+    - mkdir -p $GOPATH/src/github.com/a-castellano
+    - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/security-cam-bot
+    - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
+  script:
+    - make test_integration
+
+coverage:
+  stage: coverage
+  services:
+    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202104052102
+      alias: rabbitmq
+  before_script:
+    - export CC=/usr/bin/clang
+    - export GOPATH="$(pwd)/go"
+    - mkdir -p "$(pwd)/go"
+    - go env -w GOPATH="$(pwd)/go"
+    - mkdir -p $GOPATH/src/github.com/a-castellano
+    - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/security-cam-bot
+    - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
+  script:
+    - make coverage
+  coverage: /total:\s+.+\s(\d+\.\d+?)%$/
+  artifacts:
+    name: "coverage-$CI_PIPELINE_ID"
+    paths:
+      - cover
+    expire_in: 1 hour
+
+code_coverage_report:
+  stage: report
+  services:
+    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202104052102
+      alias: rabbitmq
+  before_script:
+    - export CC=/usr/bin/clang
+    - export GOPATH="$(pwd)/go"
+    - mkdir -p "$(pwd)/go"
+    - go env -w GOPATH="$(pwd)/go"
+    - mkdir -p $GOPATH/src/github.com/a-castellano
+    - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/security-cam-bot
+    - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
+  script:
+    - make coverhtml
+  only:
+  - master
+  dependencies:
+  - coverage
+  artifacts:
+    name: "coverage-$CI_PIPELINE_ID"
+    paths:
+      - coverage.html
+      - cover
+    expire_in: 1 hour
+
+scan:
+  stage: scan
+  image: daedalusproject/base_sonar_scanner
+  script:
+  - sonar-scanner -Dsonar.projectKey=security-cam-bpt -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.windmaker.net -Dsonar.login=${SONAR_LOGIN} -Dsonar.exclusions="*/*_test.go" -Dsonar.go.coverage.reportPaths="cover/coverage.report"
+  dependencies:
+  - coverage
+
+pages:
+  stage: deploy
+  image: registry.windmaker.net:5005/a-castellano/limani/base:202104052102
+  script:
+  - cp coverage.html public/
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
+  dependencies:
+  - code_coverage_report
