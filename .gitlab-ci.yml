@@ -1,4 +1,4 @@
-image: registry.windmaker.net:5005/a-castellano/limani/base_golang_1_15:202104052102
+image: registry.windmaker.net:5005/a-castellano/limani/base_golang_1_15:202107272042
 
 stages:
     - unit_tests
@@ -65,7 +65,7 @@ lint_code:
 integration_tests:
   stage: integration_tests
   services:
-    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202104052102
+    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202107272042
       alias: rabbitmq
   before_script:
     - export CC=/usr/bin/clang
@@ -81,7 +81,7 @@ integration_tests:
 coverage:
   stage: coverage
   services:
-    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202104052102
+    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202107272042
       alias: rabbitmq
   before_script:
     - export CC=/usr/bin/clang
@@ -103,7 +103,7 @@ coverage:
 code_coverage_report:
   stage: report
   services:
-    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202104052102
+    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202107272042
       alias: rabbitmq
   before_script:
     - export CC=/usr/bin/clang
@@ -136,7 +136,7 @@ scan:
 
 pages:
   stage: deploy
-  image: registry.windmaker.net:5005/a-castellano/limani/base:202104052102
+  image: registry.windmaker.net:5005/a-castellano/limani/base:202107272042
   script:
   - cp coverage.html public/
   artifacts:
