@@ -17,14 +17,26 @@ func TestProcessNoConfigFilePresent(t *testing.T) {
 	}
 }
 
-func TestProcessServerOnlyHostInConfig(t *testing.T) {
+func TestProcessConfigNoTelegramToken(t *testing.T) {
 	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_no_telegram_token/")
 	_, err := ReadConfig()
 	if err == nil {
-		t.Errorf("ReadConfig method without server port should fail.")
+		t.Errorf("ReadConfig method without telegram token should fail.")
 	} else {
 		if err.Error() != "Fatal error config: no telegram_bot token was found." {
 			t.Errorf("Error should be \"Fatal error config: no telegram_bot token was found.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
+func TestProcessConfigNoAllowedSenders(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_no_allowed_senders/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method without allowed senders should fail.")
+	} else {
+		if err.Error() != "Fatal error config: no allowed senders were found." {
+			t.Errorf("Error should be \"Fatal error config: no allowed senders were found.\" but error was '%s'.", err.Error())
 		}
 	}
 }

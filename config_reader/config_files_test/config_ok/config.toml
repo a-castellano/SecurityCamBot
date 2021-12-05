@@ -1,2 +1,11 @@
 [telegram_bot]
 token = "token"
+
+[telegram_bot.allwed_senders]
+[telegram_bot.allwed_senders.alice]
+name = "Alice"
+id = 12
+
+[telegram_bot.allwed_senders.bob]
+name = "Bob"
+id = 13
