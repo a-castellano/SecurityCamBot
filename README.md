@@ -29,6 +29,14 @@ Config files must include the following sections:
 
 Defines telegram bot config:
 * token -> bot token
-* allowed_senders -> list of telegram users allowed to interact with the bot.
+* allowed_senders -> list of telegram users allowed to interact with this bot.
   * id -> user ID
   * name -> user name
+
+## Logging
+
+This bot wites logs to syslog:
+```
+Dec  5 15:51:29 metatron security-cam-bot[8220]: Blocked message received from sender 112897183.
+Dec  5 15:56:40 metatron security-cam-bot[8962]: /hello received from sender Bob.
+```
