@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -47,8 +48,8 @@ func TestProcessConfigRepeatedAllowedSenders(t *testing.T) {
 	if err == nil {
 		t.Errorf("ReadConfig method with repeated allowed senders should fail.")
 	} else {
-		if err.Error() != "Fatal error config: allowed sender bob id is repeated." {
-			t.Errorf("Error should be \"Fatal error config: allowed sender bob id is repeated.\" but error was '%s'.", err.Error())
+		if !strings.Contains(err.Error(), "id is repeated.") {
+			t.Errorf("Error should contain \"id is repeated.\" but error was '%s'.", err.Error())
 		}
 	}
 }
@@ -59,8 +60,8 @@ func TestProcessConfigRepeatedAllowedSenders2(t *testing.T) {
 	if err == nil {
 		t.Errorf("ReadConfig method with repeated allowed senders should fail.")
 	} else {
-		if err.Error() != "Fatal error config: allowed sender bob name is repeated." {
-			t.Errorf("Error should be \"Fatal error config: allowed sender bob name is repeated.\" but error was '%s'.", err.Error())
+		if !strings.Contains(err.Error(), "name is repeated.") {
+			t.Errorf("Error should contain \"name is repeated.\" but error was '%s'.", err.Error())
 		}
 	}
 }
@@ -76,5 +77,11 @@ func TestOKConfig(t *testing.T) {
 	}
 	if len(config.TelegramBot.AllowedSenders) != 2 {
 		t.Errorf("TelegramBot AllowedSenders length should be 2. Returned: %d.", len(config.TelegramBot.AllowedSenders))
+	}
+	if config.TelegramBot.AllowedSenders[12].Name != "Alice" {
+		t.Errorf("TelegramBot AllowedSenders with id 12 should be Alice. Returned: %s.", config.TelegramBot.AllowedSenders[12].Name)
+	}
+	if config.TelegramBot.AllowedSenders[13].Name != "Bob" {
+		t.Errorf("TelegramBot AllowedSenders with id 13 should be Bob. Returned: %s.", config.TelegramBot.AllowedSenders[12].Name)
 	}
 }

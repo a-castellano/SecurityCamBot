@@ -9,7 +9,7 @@ import (
 
 type TelegramBot struct {
 	Token          string
-	AllowedSenders []TelegramAllowedSender
+	AllowedSenders map[int]TelegramAllowedSender
 }
 
 type TelegramAllowedSender struct {
@@ -63,7 +63,7 @@ func ReadConfig() (Config, error) {
 		}
 	}
 
-	var senders []TelegramAllowedSender
+	senders := make(map[int]TelegramAllowedSender)
 
 	readedNames := make(map[string]bool)
 	readedIDs := make(map[int]bool)
@@ -104,7 +104,7 @@ func ReadConfig() (Config, error) {
 					}
 				}
 			}
-			senders = append(senders, newSender)
+			senders[newSender.ID] = newSender
 		}
 	}
 
