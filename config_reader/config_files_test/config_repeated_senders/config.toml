@@ -8,4 +8,4 @@ id = 12
 
 [telegram_bot.allowed_senders.bob]
 name = "Bob"
-id = 13
+id = 12
