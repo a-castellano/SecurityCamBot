@@ -34,7 +34,8 @@ func main() {
 
 		senderID := upd.Message.Sender.ID
 		if _, allowedSender := botConfig.TelegramBot.AllowedSenders[senderID]; !allowedSender {
-			log.Println("Blocked message received from sender", senderID, ".")
+			logError := fmt.Sprintf("Blocked message received from sender %d.", senderID)
+			log.Println(logError)
 			return false
 		}
 

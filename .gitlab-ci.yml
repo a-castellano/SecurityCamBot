@@ -5,7 +5,6 @@ stages:
     - coverage
     - report
     - scan
-    - deploy
 
 unit_tests:
   stage: unit_tests
@@ -113,16 +112,3 @@ scan:
   - sonar-scanner -Dsonar.projectKey=security-cam-bpt -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.windmaker.net -Dsonar.login=${SONAR_LOGIN} -Dsonar.exclusions="*/*_test.go" -Dsonar.go.coverage.reportPaths="cover/coverage.report"
   dependencies:
   - coverage
-
-pages:
-  stage: deploy
-  image: registry.windmaker.net:5005/a-castellano/limani/base:202107272042
-  script:
-  - cp coverage.html public/
-  artifacts:
-    paths:
-    - public
-  only:
-  - master
-  dependencies:
-  - code_coverage_report
