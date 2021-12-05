@@ -35,8 +35,32 @@ func TestProcessConfigNoAllowedSenders(t *testing.T) {
 	if err == nil {
 		t.Errorf("ReadConfig method without allowed senders should fail.")
 	} else {
-		if err.Error() != "Fatal error config: no allowed senders were found." {
-			t.Errorf("Error should be \"Fatal error config: no allowed senders were found.\" but error was '%s'.", err.Error())
+		if err.Error() != "Fatal error config: no telegram_bot allowed_senders was found." {
+			t.Errorf("Error should be \"Fatal error config: no telegram_bot allowed_senders was found.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
+func TestProcessConfigRepeatedAllowedSenders(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_repeated_senders/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method with repeated allowed senders should fail.")
+	} else {
+		if err.Error() != "Fatal error config: allowed sender bob id is repeated." {
+			t.Errorf("Error should be \"Fatal error config: allowed sender bob id is repeated.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
+func TestProcessConfigRepeatedAllowedSenders2(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_repeated_senders2/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method with repeated allowed senders should fail.")
+	} else {
+		if err.Error() != "Fatal error config: allowed sender bob name is repeated." {
+			t.Errorf("Error should be \"Fatal error config: allowed sender bob name is repeated.\" but error was '%s'.", err.Error())
 		}
 	}
 }
@@ -49,5 +73,8 @@ func TestOKConfig(t *testing.T) {
 	}
 	if config.TelegramBot.Token != "token" {
 		t.Errorf("TelegramBot token should be token. Returned: %s.", config.TelegramBot.Token)
+	}
+	if len(config.TelegramBot.AllowedSenders) != 2 {
+		t.Errorf("TelegramBot AllowedSenders length should be 2. Returned: %d.", len(config.TelegramBot.AllowedSenders))
 	}
 }
