@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"log/syslog"
 	"time"
 
 	config "github.com/a-castellano/SecurityCamBot/config_reader"
@@ -10,14 +11,20 @@ import (
 
 func main() {
 
-	botConfig, errConfig := config.ReadConfig()
+	logwriter, e := syslog.New(syslog.LOG_NOTICE, "security-cam-bot")
+	if e == nil {
+		log.SetOutput(logwriter)
+		// Remove date prefix
+		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+	}
 
+	botConfig, errConfig := config.ReadConfig()
 	if errConfig != nil {
 		log.Fatal(errConfig)
 		return
 	}
 
-	b, err := tb.NewBot(tb.Settings{
+	bot, err := tb.NewBot(tb.Settings{
 		Token:  botConfig.TelegramBot.Token,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
@@ -27,9 +34,11 @@ func main() {
 		return
 	}
 
-	b.Handle("/hello", func(m *tb.Message) {
-		b.Send(m.Sender, "Hello World!")
+	bot.Handle("/hello", func(m *tb.Message) {
+		sender_id := m.Sender.ID
+		log.Println("/hello received from sender", sender_id, ".")
+		bot.Send(m.Sender, "Hello World!")
 	})
 
-	b.Start()
+	bot.Start()
 }
