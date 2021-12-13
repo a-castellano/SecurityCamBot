@@ -1,10 +1,11 @@
-image: registry.windmaker.net:5005/a-castellano/limani/base_golang_1_15:202107272042
+image: registry.windmaker.net:5005/a-castellano/limani/base_golang_1_17:202112131727
 
 stages:
     - unit_tests
     - coverage
     - report
     - scan
+    - build
 
 unit_tests:
   stage: unit_tests
@@ -81,9 +82,6 @@ coverage:
 
 code_coverage_report:
   stage: report
-  services:
-    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202107272042
-      alias: rabbitmq
   before_script:
     - export CC=/usr/bin/clang
     - export GOPATH="$(pwd)/go"
@@ -95,9 +93,9 @@ code_coverage_report:
   script:
     - make coverhtml
   only:
-  - master
+    - master
   dependencies:
-  - coverage
+    - coverage
   artifacts:
     name: "coverage-$CI_PIPELINE_ID"
     paths:
@@ -112,3 +110,29 @@ scan:
   - sonar-scanner -Dsonar.projectKey=security-cam-bpt -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.windmaker.net -Dsonar.login=${SONAR_LOGIN} -Dsonar.exclusions="*/*_test.go" -Dsonar.go.coverage.reportPaths="cover/coverage.report"
   dependencies:
   - coverage
+
+build_package:
+  stage: build
+  image: registry.windmaker.net:5005/a-castellano/limani/base_deb_golang_1_17_builder:202112131727
+  before_script:
+    - export CC=/usr/bin/clang
+    - export GOPATH="$(pwd)/go"
+    - mkdir -p "$(pwd)/go"
+    - go env -w GOPATH="$(pwd)/go"
+    - mkdir -p $GOPATH/src/github.com/a-castellano
+    - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/security-cam-bot
+    - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
+  script:
+    - make build
+    - nfpm package --packager deb
+    - mkdir deb_package
+    - mv *.deb deb_package/
+  dependencies:
+    - coverage
+  artifacts:
+    name: "coverage-$CI_PIPELINE_ID"
+    paths:
+      - deb_package
+    expire_in: 1 hour
+  only:
+    - master
