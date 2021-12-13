@@ -32,7 +32,7 @@ func main() {
 			return true
 		}
 
-		senderID := upd.Message.Sender.ID
+		senderID := int(upd.Message.Sender.ID)
 		if _, allowedSender := botConfig.TelegramBot.AllowedSenders[senderID]; !allowedSender {
 			logError := fmt.Sprintf("Blocked message received from sender %d.", senderID)
 			log.Println(logError)
@@ -53,7 +53,7 @@ func main() {
 	}
 
 	bot.Handle("/hello", func(m *tb.Message) {
-		senderID := m.Sender.ID
+		senderID := int(m.Sender.ID)
 		senderName := botConfig.TelegramBot.AllowedSenders[senderID].Name
 		logMsg := fmt.Sprintf("/hello received from sender %s.", senderName)
 		log.Println(logMsg)
