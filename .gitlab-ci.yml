@@ -123,7 +123,5 @@ build_package:
     - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/security-cam-bot
     - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
   script:
-  - go build
-  - nfpm package --packager deb
-  - mkdir package
-  - mv *.deb package/
+    - make build
+    - ls -lahrt
