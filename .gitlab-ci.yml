@@ -125,3 +125,5 @@ build_package:
   script:
     - make build
     - ls -lahrt
+  dependencies:
+  - coverage
