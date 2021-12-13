@@ -1,0 +1,31 @@
+# nfpm example config file
+#
+# check https://nfpm.goreleaser.com/configuration for detailed usage
+#
+name: "windmaker-security-cam-bot"
+arch: "amd64"
+platform: "linux"
+version: "v0.0.1"
+section: "default"
+priority: "extra"
+provides:
+- secutiycambot
+maintainer: "Álvaro Castellano Vela <alvaro.castellano.vela@gmail.com>"
+description: |
+  Telegram bot for managing webcams and 
+    receiving alerts from then.
+vendor: "Windmaker"
+homepage: "https://git.windmaker.net/a-castellano/SecurityCamBot"
+license: "BSD 2"
+changelog: "changelog.yaml"
+contents:
+- src: ./main
+  dst: /usr/local/bin/windmaker-security-cam-bot
+- src: ./packaging/deb/default/windmaker-security-cam-bot
+  dst: /etc/default/windmaker-security-cam-bot
+- src: ./packaging/deb/systemd/windmaker-security-cam-bot.service
+  dst: /usr/lib/systemd/system/windmaker-security-cam-bot.service
+overrides:
+  deb:
+    scripts:
+      postinstall: ./packaging/deb/scripts/postinstall.sh
