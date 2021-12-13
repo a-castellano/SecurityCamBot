@@ -4,7 +4,13 @@ Telegram bot for managing webcams and receiving alerts from then.
 
 ## Install
 
-To Do.
+Add Widmaker repo ans install **windmaker-security-cam-bot**:
+```bash
+wget -O - https://packages.windmaker.net/WINDMAKER-GPG-KEY.pub | sudo apt-key add -
+sudo add-apt-repository "deb http://packages.windmaker.net/ focal main"
+sudo apt-get update
+sudo apt-get install windmaker-security-cam-bot
+```
 
 ## Configuration
 
@@ -32,6 +38,15 @@ Defines telegram bot config:
 * allowed_senders -> list of telegram users allowed to interact with this bot.
   * id -> user ID
   * name -> user name
+
+## Systemd service setup
+
+After saving config in **/etc/windmaker-security-cam-bot/config.toml** systemd service can be enabled:
+```bash
+sudo /bin/systemctl daemon-reload
+sudo /bin/systemctl enable windmaker-security-cam-bot
+sudo /bin/systemctl start windmaker-security-cam-bot
+```
 
 ## Logging
 
