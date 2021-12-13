@@ -113,8 +113,7 @@ scan:
 
 build_package:
   stage: build
-  image: registry.windmaker.net:5005/a-castellano/limani/
-base_deb_golang_1_17_builder:202112120140
+  image: registry.windmaker.net:5005/a-castellano/limani/base_deb_golang_1_17_builder:202112120140
   script:
   - go build
   - nfpm package --packager deb
