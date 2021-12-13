@@ -17,3 +17,4 @@
 # Custom
 config.toml
 main
+*.deb
