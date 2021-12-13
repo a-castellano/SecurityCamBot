@@ -4,6 +4,7 @@ import (
 	"errors"
 	"reflect"
 
+	webcam "github.com/a-castellano/Reolink-Manager/webcam"
 	viperLib "github.com/spf13/viper"
 )
 
@@ -37,8 +38,10 @@ func ReadConfig() (Config, error) {
 
 	var envVariable string = "SECURITY_CAM_BOT_CONFIG_FILE_LOCATION"
 
+	requiredVariables := []string{"telegram_bot", "webcams"}
 	telegramBotVariables := []string{"token", "allowed_senders"}
 	allowedSendersVariables := []string{"name", "id"}
+	webcamVariables := []string{"ip", "user", "password"}
 
 	viper := viperLib.New()
 
@@ -57,10 +60,20 @@ func ReadConfig() (Config, error) {
 		return config, errors.New(errors.New("Fatal error reading config file: ").Error() + err.Error())
 	}
 
-	for _, telegram_bot_variable := range telegramBotVariables {
-		if !viper.IsSet("telegram_bot." + telegram_bot_variable) {
-			return config, errors.New("Fatal error config: no telegram_bot " + telegram_bot_variable + " was found.")
+	for _, requiredVariable := range requiredVariables {
+		if !viper.IsSet(requiredVariable) {
+			return config, errors.New("Fatal error config: no telegram_bot " + requiredVariable + " was found.")
 		}
+	}
+
+	for _, telegramBotVariable := range telegramBotVariables {
+		if !viper.IsSet("telegram_bot." + telegramBotVariable) {
+			return config, errors.New("Fatal error config: no telegram_bot " + telegramBotVariable + " was found.")
+		}
+	}
+
+	if !viper.IsSet("webcams.webcam") {
+		return config, errors.New("Fatal error config: no webcams were found.")
 	}
 
 	senders := make(map[int]TelegramAllowedSender)
@@ -106,6 +119,27 @@ func ReadConfig() (Config, error) {
 			}
 			senders[newSender.ID] = newSender
 		}
+	}
+
+	webcams := make(map[string]webcam.Webcam)
+	readedWebCamNames := make(map[string]bool)
+	readedWebCamIPs := make(map[string]bool)
+	readedWebcams := viper.GetStringMap("telegram_bot.webcams")
+	for webcamName, webcamInfo := range readedWebcams {
+		webcamInfoValue := reflect.ValueOf(webcamInfo)
+		var newWebcam webcam.Webcam
+		if webcamInfoValue.Kind() != reflect.Map {
+			return config, errors.New("Fatal error config: webcam " + webcamName + " not a map.")
+		} else {
+
+			webcamInfoValueMap := webcamInfoValue.Interface().(map[string]interface{})
+
+			keys := make([]string, 0, len(senderInfoValueMap))
+			for key_name := range senderInfoValueMap {
+				keys = append(keys, key_name)
+			}
+		}
+
 	}
 
 	telegrambotConfig := TelegramBot{Token: viper.GetString("telegram_bot.token"), AllowedSenders: senders}
