@@ -4,7 +4,7 @@ import (
 	"errors"
 	"reflect"
 
-	webcam "github.com/a-castellano/Reolink-Manager/webcam"
+	webcam "github.com/a-castellano/reolink-manager/webcam"
 	viperLib "github.com/spf13/viper"
 )
 
@@ -41,7 +41,7 @@ func ReadConfig() (Config, error) {
 	requiredVariables := []string{"telegram_bot", "webcams"}
 	telegramBotVariables := []string{"token", "allowed_senders"}
 	allowedSendersVariables := []string{"name", "id"}
-	webcamVariables := []string{"ip", "user", "password"}
+	webcamRequiredVariables := []string{"ip", "user", "password"}
 
 	viper := viperLib.New()
 
@@ -62,7 +62,7 @@ func ReadConfig() (Config, error) {
 
 	for _, requiredVariable := range requiredVariables {
 		if !viper.IsSet(requiredVariable) {
-			return config, errors.New("Fatal error config: no telegram_bot " + requiredVariable + " was found.")
+			return config, errors.New("Fatal error config: no " + requiredVariable + " was found.")
 		}
 	}
 
@@ -132,16 +132,42 @@ func ReadConfig() (Config, error) {
 			return config, errors.New("Fatal error config: webcam " + webcamName + " not a map.")
 		} else {
 
-			webcamInfoValueMap := webcamInfoValue.Interface().(map[string]interface{})
+			if _, ok := readedWebCamNames[webcamName]; ok {
+				return config, errors.New("Fatal error config: webcam " + webcamName + " is repeated.")
+			} else {
 
-			keys := make([]string, 0, len(senderInfoValueMap))
-			for key_name := range senderInfoValueMap {
-				keys = append(keys, key_name)
+				webcamInfoValueMap := webcamInfoValue.Interface().(map[string]interface{})
+
+				keys := make([]string, 0, len(webcamInfoValueMap))
+				for key_name := range webcamInfoValueMap {
+					keys = append(keys, key_name)
+				}
+				for _, requiredWebcamKey := range webcamRequiredVariables {
+					if !contains(keys, requiredWebcamKey) {
+						return config, errors.New("Fatal error config: webcam " + webcamName + " has no " + requiredWebcamKey + ".")
+					} else {
+						if requiredWebcamKey == "ip" {
+							newWebcam.IP = reflect.ValueOf(webcamInfoValueMap[requiredWebcamKey]).Interface().(string)
+							if _, ok := readedWebCamIPs[newWebcam.IP]; ok {
+								return config, errors.New("Fatal error config: webcam " + webcamName + " ip is repeated.")
+							} else {
+								readedWebCamIPs[newWebcam.IP] = true
+							}
+						} else {
+							if requiredWebcamKey == "user" {
+								newWebcam.User = reflect.ValueOf(webcamInfoValueMap[requiredWebcamKey]).Interface().(string)
+							} else {
+								if requiredWebcamKey == "password" {
+									newWebcam.Password = reflect.ValueOf(webcamInfoValueMap[requiredWebcamKey]).Interface().(string)
+								}
+							}
+						}
+					}
+				}
+				webcams[webcamName] = newWebcam
 			}
 		}
-
 	}
-
 	telegrambotConfig := TelegramBot{Token: viper.GetString("telegram_bot.token"), AllowedSenders: senders}
 
 	config.TelegramBot = telegrambotConfig
