@@ -1,0 +1,15 @@
+[telegram_bot]
+token = "token"
+
+[telegram_bot.allowed_senders]
+[telegram_bot.allowed_senders.alice]
+name = "Alice"
+id = 12
+
+[telegram_bot.allowed_senders.bob]
+name = "Bob"
+id = 13
+
+[webcams]
+[webcams.cam01]
+ip = "10.10.10.10"
