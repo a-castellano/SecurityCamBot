@@ -72,10 +72,6 @@ func ReadConfig() (Config, error) {
 		}
 	}
 
-	if !viper.IsSet("webcams.webcam") {
-		return config, errors.New("Fatal error config: no webcams were found.")
-	}
-
 	senders := make(map[int]TelegramAllowedSender)
 
 	readedNames := make(map[string]bool)
@@ -124,7 +120,7 @@ func ReadConfig() (Config, error) {
 	webcams := make(map[string]webcam.Webcam)
 	readedWebCamNames := make(map[string]bool)
 	readedWebCamIPs := make(map[string]bool)
-	readedWebcams := viper.GetStringMap("telegram_bot.webcams")
+	readedWebcams := viper.GetStringMap("webcams")
 	for webcamName, webcamInfo := range readedWebcams {
 		webcamInfoValue := reflect.ValueOf(webcamInfo)
 		var newWebcam webcam.Webcam
@@ -167,6 +163,9 @@ func ReadConfig() (Config, error) {
 				webcams[webcamName] = newWebcam
 			}
 		}
+	}
+	if len(webcams) == 0 {
+		return config, errors.New("Fatal error config: no webcams were found.")
 	}
 	telegrambotConfig := TelegramBot{Token: viper.GetString("telegram_bot.token"), AllowedSenders: senders}
 

@@ -82,10 +82,46 @@ func TestProcessConfigNoWebCams(t *testing.T) {
 	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_no_web_cams/")
 	_, err := ReadConfig()
 	if err == nil {
-		t.Errorf("Fatal error config: no webcams were found.")
+		t.Errorf("ReadConfig method with no webcams info should fail.")
 	} else {
 		if err.Error() != "Fatal error config: no webcams were found." {
 			t.Errorf("Error should be \"Fatal error config: no webcams were found.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
+func TestProcessConfigNoWebCamIP(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_no_web_cam_ip/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method with no webcam IP should fail.")
+	} else {
+		if err.Error() != "Fatal error config: webcam cam01 has no ip." {
+			t.Errorf("Error should be \"Fatal error config: webcam cam01 has no ip.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
+func TestProcessConfigNoWebCamUser(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_no_web_cam_user/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method with no webcam user should fail.")
+	} else {
+		if err.Error() != "Fatal error config: webcam cam01 has no user." {
+			t.Errorf("Error should be \"Fatal error config: webcam cam01 has no user.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
+func TestProcessConfigNoWebCamPassword(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_no_web_cam_password/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method with no webcam password should fail.")
+	} else {
+		if err.Error() != "Fatal error config: webcam cam01 has no password." {
+			t.Errorf("Error should be \"Fatal error config: webcam cam01 has no password.\" but error was '%s'.", err.Error())
 		}
 	}
 }

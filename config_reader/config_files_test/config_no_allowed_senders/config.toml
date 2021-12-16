@@ -2,7 +2,7 @@
 token = "token"
 
 [webcams]
-[webcams.webcam.cam01]
+[webcams.cam01]
 ip = "10.10.10.34"
 user = "user"
 password = "pass"
