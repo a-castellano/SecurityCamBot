@@ -62,7 +62,7 @@ func ReadConfig() (Config, error) {
 
 	for _, requiredVariable := range requiredVariables {
 		if !viper.IsSet(requiredVariable) {
-			return config, errors.New("Fatal error config: no " + requiredVariable + " was found.")
+			return config, errors.New("Fatal error config: no " + requiredVariable + " field was found.")
 		}
 	}
 

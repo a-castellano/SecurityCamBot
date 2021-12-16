@@ -1,2 +1,8 @@
 [telegram_bot]
 token = "token"
+
+[webcams]
+[webcams.webcam.cam01]
+ip = "10.10.10.34"
+user = "user"
+password = "pass"
