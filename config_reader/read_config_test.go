@@ -126,6 +126,30 @@ func TestProcessConfigNoWebCamPassword(t *testing.T) {
 	}
 }
 
+func TestProcessConfigInvalidWebCamIP(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_invalid_ip/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method with invalid webcam IP should fail.")
+	} else {
+		if err.Error() != "Fatal error config: webcam cam01 ip is invalid." {
+			t.Errorf("Error should be \"Fatal error config: webcam cam01 ip is invalid.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
+func TestProcessConfigWebCamRepetedIP(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_repeated_ips/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method with invalid webcam IP should fail.")
+	} else {
+		if err.Error() != "Fatal error config: webcam cam02 ip is repeated." {
+			t.Errorf("Error should be \"Fatal error config: webcam cam02 ip is repeated.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
 func TestOKConfig(t *testing.T) {
 	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_ok/")
 	config, err := ReadConfig()

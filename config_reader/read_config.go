@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"net"
 	"reflect"
 
 	webcam "github.com/a-castellano/reolink-manager/webcam"
@@ -144,10 +145,14 @@ func ReadConfig() (Config, error) {
 					} else {
 						if requiredWebcamKey == "ip" {
 							newWebcam.IP = reflect.ValueOf(webcamInfoValueMap[requiredWebcamKey]).Interface().(string)
-							if _, ok := readedWebCamIPs[newWebcam.IP]; ok {
-								return config, errors.New("Fatal error config: webcam " + webcamName + " ip is repeated.")
+							if net.ParseIP(newWebcam.IP) == nil {
+								return config, errors.New("Fatal error config: webcam " + webcamName + " ip is invalid.")
 							} else {
-								readedWebCamIPs[newWebcam.IP] = true
+								if _, ok := readedWebCamIPs[newWebcam.IP]; ok {
+									return config, errors.New("Fatal error config: webcam " + webcamName + " ip is repeated.")
+								} else {
+									readedWebCamIPs[newWebcam.IP] = true
+								}
 							}
 						} else {
 							if requiredWebcamKey == "user" {
