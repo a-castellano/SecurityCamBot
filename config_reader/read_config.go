@@ -21,6 +21,7 @@ type TelegramAllowedSender struct {
 
 type Config struct {
 	TelegramBot TelegramBot
+	Webcams     map[string]webcam.Webcam
 }
 
 func contains(keys []string, keyName string) bool {
@@ -175,6 +176,7 @@ func ReadConfig() (Config, error) {
 	telegrambotConfig := TelegramBot{Token: viper.GetString("telegram_bot.token"), AllowedSenders: senders}
 
 	config.TelegramBot = telegrambotConfig
+	config.Webcams = webcams
 
 	return config, nil
 }

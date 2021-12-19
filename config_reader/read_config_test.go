@@ -144,8 +144,8 @@ func TestProcessConfigWebCamRepetedIP(t *testing.T) {
 	if err == nil {
 		t.Errorf("ReadConfig method with invalid webcam IP should fail.")
 	} else {
-		if err.Error() != "Fatal error config: webcam cam02 ip is repeated." {
-			t.Errorf("Error should be \"Fatal error config: webcam cam02 ip is repeated.\" but error was '%s'.", err.Error())
+		if !strings.Contains(err.Error(), "ip is repeated.") {
+			t.Errorf("Error should contain \"ip is repeated.\" but error was '%s'.", err.Error())
 		}
 	}
 }
@@ -168,4 +168,11 @@ func TestOKConfig(t *testing.T) {
 	if config.TelegramBot.AllowedSenders[13].Name != "Bob" {
 		t.Errorf("TelegramBot AllowedSenders with id 13 should be Bob. Returned: %s.", config.TelegramBot.AllowedSenders[12].Name)
 	}
+	if len(config.Webcams) != 2 {
+		t.Errorf("Config should contain 2 webcams. Returned: %d.", len(config.Webcams))
+	}
+	if config.Webcams["cam02"].IP != "10.10.10.35" {
+		t.Errorf("TelegramBot cam02 should have IP 10.10.10.35. Returned: %s.", config.Webcams["cam02"].IP)
+	}
+
 }
