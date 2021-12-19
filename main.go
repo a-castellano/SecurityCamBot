@@ -52,12 +52,68 @@ func main() {
 		return
 	}
 
+	var (
+		// Universal markup builders.
+		mainMenu = &tb.ReplyMarkup{ResizeReplyKeyboard: true}
+		//selector = &tb.ReplyMarkup{}
+
+		// Reply buttons.
+		btnHelp = mainMenu.Text("📷  Manage Cameras")
+
+		// Inline buttons.
+		//
+		// Pressing it will cause the client to
+		// send the bot a callback.
+		//
+		// Make sure Unique stays unique as per button kind,
+		// as it has to be for callback routing to work.
+		//
+		//		btnPrev = selector.Data("⬅", "prev")
+		//		btnNext = selector.Data("➡", "next")
+	)
+
+	mainMenu.Reply(
+		mainMenu.Row(btnHelp),
+		//mainMenu.Row(btnSettings),
+	)
+	//	selector.Inline(
+	//		selector.Row(btnPrev, btnNext),
+	//	)
+
 	bot.Handle("/hello", func(m *tb.Message) {
 		senderID := int(m.Sender.ID)
 		senderName := botConfig.TelegramBot.AllowedSenders[senderID].Name
 		logMsg := fmt.Sprintf("/hello received from sender %s.", senderName)
 		log.Println(logMsg)
 		response := fmt.Sprintf("Hello %s.", senderName)
+		bot.Send(m.Sender, response)
+	})
+
+	bot.Handle("/start", func(m *tb.Message) {
+		senderID := int(m.Sender.ID)
+		senderName := botConfig.TelegramBot.AllowedSenders[senderID].Name
+		logMsg := fmt.Sprintf("/start command received from sender %s.", senderName)
+		log.Println(logMsg)
+		response := fmt.Sprintf("Hello %s, please select and option.", senderName)
+		bot.Send(m.Sender, response, mainMenu)
+	})
+
+	bot.Handle("📷  Manage Cameras", func(m *tb.Message) {
+		senderID := int(m.Sender.ID)
+		senderName := botConfig.TelegramBot.AllowedSenders[senderID].Name
+		logMsg := fmt.Sprintf("Manage Cameras command received from sender %s.", senderName)
+		log.Println(logMsg)
+		response := fmt.Sprintf("OK")
+		bot.Send(m.Sender, response)
+	})
+
+	bot.Handle(tb.OnText, func(m *tb.Message) {
+		senderID := int(m.Sender.ID)
+		senderName := botConfig.TelegramBot.AllowedSenders[senderID].Name
+		logMsg := fmt.Sprintf("Received text  unhandled message from sender %s.", senderName)
+		fmt.Println(m.Text)
+		log.Println(logMsg)
+		response := fmt.Sprintf("Sorry %s, I don't know what are you talking about.", senderName)
 		bot.Send(m.Sender, response)
 	})
 
