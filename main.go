@@ -58,7 +58,7 @@ func main() {
 		//selector = &tb.ReplyMarkup{}
 
 		// Reply buttons.
-		btnHelp = mainMenu.Text("📷  Manage Cameras")
+		btnCameraRebootOption = mainMenu.Text("📷  Reboot Cameras")
 
 		// Inline buttons.
 		//
@@ -73,7 +73,7 @@ func main() {
 	)
 
 	mainMenu.Reply(
-		mainMenu.Row(btnHelp),
+		mainMenu.Row(btnCameraRebootOption),
 		//mainMenu.Row(btnSettings),
 	)
 	//	selector.Inline(
@@ -98,13 +98,21 @@ func main() {
 		bot.Send(m.Sender, response, mainMenu)
 	})
 
-	bot.Handle("📷  Manage Cameras", func(m *tb.Message) {
+	bot.Handle("📷  Reboot Cameras", func(m *tb.Message) {
 		senderID := int(m.Sender.ID)
 		senderName := botConfig.TelegramBot.AllowedSenders[senderID].Name
 		logMsg := fmt.Sprintf("Manage Cameras command received from sender %s.", senderName)
 		log.Println(logMsg)
-		response := fmt.Sprintf("OK")
-		bot.Send(m.Sender, response)
+
+		rebootWebcamsMenu := &tb.ReplyMarkup{}
+		for webCamName, _ := range botConfig.Webcams {
+			commandName := fmt.Sprintf("Reboot %s.", webCamName)
+			rebootWebcamsMenu.Text(commandName)
+		}
+
+		response := "Select a cemera to be rebooted."
+		mainMenu.ReplyKeyboardRemove()
+		bot.Send(m.Sender, response, nil)
 	})
 
 	bot.Handle(tb.OnText, func(m *tb.Message) {
