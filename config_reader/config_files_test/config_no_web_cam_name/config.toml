@@ -15,8 +15,3 @@ id = 13
 ip = "10.10.10.34"
 user = "user"
 password = "pass"
-
-[webcams.cam02]
-ip = "10.10.10.35"
-user = "user"
-password = "pass"

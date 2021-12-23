@@ -142,7 +142,7 @@ func TestProcessConfigWebCamRepetedIP(t *testing.T) {
 	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_repeated_ips/")
 	_, err := ReadConfig()
 	if err == nil {
-		t.Errorf("ReadConfig method with invalid webcam IP should fail.")
+		t.Errorf("ReadConfig method with repeated webcam IP should fail.")
 	} else {
 		if !strings.Contains(err.Error(), "ip is repeated.") {
 			t.Errorf("Error should contain \"ip is repeated.\" but error was '%s'.", err.Error())
@@ -158,6 +158,18 @@ func TestProcessConfigNoWebCamName(t *testing.T) {
 	} else {
 		if err.Error() != "Fatal error config: webcam cam01 has no name." {
 			t.Errorf("Error should be \"Fatal error config: webcam cam01 has no name.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
+func TestProcessConfigWebCamRepetedName(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_repeated_names/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method with repeated webcam name should fail.")
+	} else {
+		if !strings.Contains(err.Error(), "name is repeated.") {
+			t.Errorf("Error should contain \"name is repeated.\" but error was '%s'.", err.Error())
 		}
 	}
 }
@@ -183,8 +195,8 @@ func TestOKConfig(t *testing.T) {
 	if len(config.Webcams) != 2 {
 		t.Errorf("Config should contain 2 webcams. Returned: %d.", len(config.Webcams))
 	}
-	if config.Webcams["cam02"].IP != "10.10.10.35" {
-		t.Errorf("TelegramBot cam02 should have IP 10.10.10.35. Returned: %s.", config.Webcams["cam02"].IP)
+	if config.Webcams["cam2"].IP != "10.10.10.35" {
+		t.Errorf("TelegramBot cam02 should have IP 10.10.10.35. Returned: %s.", config.Webcams["cam2"].IP)
 	}
 
 }

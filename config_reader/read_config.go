@@ -43,7 +43,7 @@ func ReadConfig() (Config, error) {
 	requiredVariables := []string{"telegram_bot", "webcams"}
 	telegramBotVariables := []string{"token", "allowed_senders"}
 	allowedSendersVariables := []string{"name", "id"}
-	webcamRequiredVariables := []string{"ip", "user", "password"}
+	webcamRequiredVariables := []string{"ip", "user", "password", "name"}
 
 	viper := viperLib.New()
 
@@ -120,18 +120,20 @@ func ReadConfig() (Config, error) {
 	}
 
 	webcams := make(map[string]webcam.Webcam)
+	readedWebCamIDs := make(map[string]bool)
 	readedWebCamNames := make(map[string]bool)
 	readedWebCamIPs := make(map[string]bool)
 	readedWebcams := viper.GetStringMap("webcams")
-	for webcamName, webcamInfo := range readedWebcams {
+	for webcamID, webcamInfo := range readedWebcams {
+		webCamName := "NoName"
 		webcamInfoValue := reflect.ValueOf(webcamInfo)
 		var newWebcam webcam.Webcam
 		if webcamInfoValue.Kind() != reflect.Map {
-			return config, errors.New("Fatal error config: webcam " + webcamName + " not a map.")
+			return config, errors.New("Fatal error config: webcam " + webcamID + " not a map.")
 		} else {
 
-			if _, ok := readedWebCamNames[webcamName]; ok {
-				return config, errors.New("Fatal error config: webcam " + webcamName + " is repeated.")
+			if _, ok := readedWebCamIDs[webcamID]; ok {
+				return config, errors.New("Fatal error config: webcam " + webcamID + " is repeated.")
 			} else {
 
 				webcamInfoValueMap := webcamInfoValue.Interface().(map[string]interface{})
@@ -142,15 +144,15 @@ func ReadConfig() (Config, error) {
 				}
 				for _, requiredWebcamKey := range webcamRequiredVariables {
 					if !contains(keys, requiredWebcamKey) {
-						return config, errors.New("Fatal error config: webcam " + webcamName + " has no " + requiredWebcamKey + ".")
+						return config, errors.New("Fatal error config: webcam " + webcamID + " has no " + requiredWebcamKey + ".")
 					} else {
 						if requiredWebcamKey == "ip" {
 							newWebcam.IP = reflect.ValueOf(webcamInfoValueMap[requiredWebcamKey]).Interface().(string)
 							if net.ParseIP(newWebcam.IP) == nil {
-								return config, errors.New("Fatal error config: webcam " + webcamName + " ip is invalid.")
+								return config, errors.New("Fatal error config: webcam " + webcamID + " ip is invalid.")
 							} else {
 								if _, ok := readedWebCamIPs[newWebcam.IP]; ok {
-									return config, errors.New("Fatal error config: webcam " + webcamName + " ip is repeated.")
+									return config, errors.New("Fatal error config: webcam " + webcamID + " ip is repeated.")
 								} else {
 									readedWebCamIPs[newWebcam.IP] = true
 								}
@@ -161,12 +163,22 @@ func ReadConfig() (Config, error) {
 							} else {
 								if requiredWebcamKey == "password" {
 									newWebcam.Password = reflect.ValueOf(webcamInfoValueMap[requiredWebcamKey]).Interface().(string)
+								} else {
+									if requiredWebcamKey == "name" {
+										webCamName = reflect.ValueOf(webcamInfoValueMap[requiredWebcamKey]).Interface().(string)
+										if _, ok := readedWebCamNames[webCamName]; ok {
+											return config, errors.New("Fatal error config: webcam " + webCamName + " name is repeated.")
+										} else {
+											readedWebCamNames[webCamName] = true
+										}
+									}
 								}
 							}
 						}
 					}
 				}
-				webcams[webcamName] = newWebcam
+
+				webcams[webCamName] = newWebcam
 			}
 		}
 	}

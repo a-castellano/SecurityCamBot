@@ -52,33 +52,10 @@ func main() {
 		return
 	}
 
-	var (
-		// Universal markup builders.
-		mainMenu = &tb.ReplyMarkup{ResizeReplyKeyboard: true}
-		//selector = &tb.ReplyMarkup{}
-
-		// Reply buttons.
-		btnCameraRebootOption = mainMenu.Text("📷  Reboot Cameras")
-
-		// Inline buttons.
-		//
-		// Pressing it will cause the client to
-		// send the bot a callback.
-		//
-		// Make sure Unique stays unique as per button kind,
-		// as it has to be for callback routing to work.
-		//
-		//		btnPrev = selector.Data("⬅", "prev")
-		//		btnNext = selector.Data("➡", "next")
-	)
-
-	mainMenu.Reply(
-		mainMenu.Row(btnCameraRebootOption),
-		//mainMenu.Row(btnSettings),
-	)
-	//	selector.Inline(
-	//		selector.Row(btnPrev, btnNext),
-	//	)
+	rebootAllCamsBtn := tb.ReplyButton{Text: "📷  Reboot Cameras"}
+	startBotReplyKeys := [][]tb.ReplyButton{
+		[]tb.ReplyButton{rebootAllCamsBtn},
+	}
 
 	bot.Handle("/hello", func(m *tb.Message) {
 		senderID := int(m.Sender.ID)
@@ -95,7 +72,10 @@ func main() {
 		logMsg := fmt.Sprintf("/start command received from sender %s.", senderName)
 		log.Println(logMsg)
 		response := fmt.Sprintf("Hello %s, please select and option.", senderName)
-		bot.Send(m.Sender, response, mainMenu)
+
+		bot.Send(m.Sender, response, &tb.ReplyMarkup{
+			ReplyKeyboard: startBotReplyKeys,
+		})
 	})
 
 	bot.Handle("📷  Reboot Cameras", func(m *tb.Message) {
@@ -104,15 +84,18 @@ func main() {
 		logMsg := fmt.Sprintf("Manage Cameras command received from sender %s.", senderName)
 		log.Println(logMsg)
 
-		rebootWebcamsMenu := &tb.ReplyMarkup{}
+		rebootCamReplyButtons := []tb.ReplyButton{}
 		for webCamName, _ := range botConfig.Webcams {
-			commandName := fmt.Sprintf("Reboot %s.", webCamName)
-			rebootWebcamsMenu.Text(commandName)
+			commandName := fmt.Sprintf("Reboot %s", webCamName)
+			rebooCamBtn := tb.ReplyButton{Text: commandName}
+			rebootCamReplyButtons = append(rebootCamReplyButtons, rebooCamBtn)
 		}
 
+		rebootCamReplyKeys := [][]tb.ReplyButton{rebootCamReplyButtons}
 		response := "Select a cemera to be rebooted."
-		mainMenu.ReplyKeyboardRemove()
-		bot.Send(m.Sender, response, nil)
+		bot.Send(m.Sender, response, &tb.ReplyMarkup{
+			ReplyKeyboard: rebootCamReplyKeys,
+		})
 	})
 
 	bot.Handle(tb.OnText, func(m *tb.Message) {
