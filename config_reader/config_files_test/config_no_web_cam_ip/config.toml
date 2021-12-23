@@ -12,3 +12,4 @@ id = 13
 
 [webcams]
 [webcams.cam01]
+name= "cam1"

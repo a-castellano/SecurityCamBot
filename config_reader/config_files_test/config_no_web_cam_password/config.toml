@@ -14,3 +14,4 @@ id = 13
 [webcams.cam01]
 ip = "10.10.10.10"
 user = "user"
+name= "cam1"

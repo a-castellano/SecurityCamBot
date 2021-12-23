@@ -150,6 +150,18 @@ func TestProcessConfigWebCamRepetedIP(t *testing.T) {
 	}
 }
 
+func TestProcessConfigNoWebCamName(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_no_web_cam_name/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method with no webcam Name should fail.")
+	} else {
+		if err.Error() != "Fatal error config: webcam cam01 has no name." {
+			t.Errorf("Error should be \"Fatal error config: webcam cam01 has no name.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
 func TestOKConfig(t *testing.T) {
 	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_ok/")
 	config, err := ReadConfig()
