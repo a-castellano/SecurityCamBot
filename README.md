@@ -12,6 +12,10 @@ sudo apt-get update
 sudo apt-get install windmaker-security-cam-bot
 ```
 
+## Allowed actions
+
+For the time being, webcams can be rebooted only.
+
 ## Configuration
 
 This bot uses a config file which folder location is defined by environment variable *SECURITY_CAM_BOT_CONFIG_FILE_LOCATION*, inside this folder it must exists a file called *config.toml*.
@@ -28,6 +32,19 @@ id = 12
 [telegram_bot.allowed_senders.bob]
 name = "Bob"
 id = 13
+
+[webcams]
+[webcams.cam01]
+name= "cam1"
+ip = "10.10.10.34"
+user = "user"
+password = "pass"
+
+[webcams.cam02]
+name= "cam2"
+ip = "10.10.10.35"
+user = "user"
+password = "pass"
 ```
 
 Config files must include the following sections:
@@ -38,6 +55,14 @@ Defines telegram bot config:
 * allowed_senders -> list of telegram users allowed to interact with this bot.
   * id -> user ID
   * name -> user name
+
+### Webcams 
+
+Webcams to manage must be set in this section.
+* name -> Name for identifying the webcam
+* ip -> Webcam IP
+* user -> Webcam user
+* password -> Webcam password
 
 ## Systemd service setup
 
