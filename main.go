@@ -73,8 +73,6 @@ func main() {
 
 	rebootCamReplyKeys := [][]tb.ReplyButton{rebootCamReplyButtons}
 
-	//	emptyReply := [][]tb.ReplyButton{rebootCamReplyButtons}
-
 	rebootCamRegex := regexp.MustCompile(`Reboot (.*)$`)
 
 	bot.Handle("/hello", func(m *tb.Message) {
@@ -128,27 +126,42 @@ func main() {
 				if connectErr != nil {
 					log.Println(connectErr)
 					connectErrResponse := fmt.Sprintf("Cannot connect with Webcam called '%s'.", camName)
-					bot.Send(m.Sender, connectErrResponse)
+					bot.Send(m.Sender, connectErrResponse,
+						&tb.ReplyMarkup{
+							ReplyKeyboard: startBotReplyKeys,
+						})
 				} else {
 					rebootErr := webcam.Reboot(client)
 					if rebootErr != nil {
 						cantRebotedResponse := fmt.Sprintf("Cannot Rebbot Webcam called '%s' has been rebooted.", camName)
-						bot.Send(m.Sender, cantRebotedResponse)
+						bot.Send(m.Sender, cantRebotedResponse,
+							&tb.ReplyMarkup{
+								ReplyKeyboard: startBotReplyKeys,
+							})
 						log.Println(rebootErr)
 					} else {
 						rebotedResponse := fmt.Sprintf("Webcam called '%s' has been rebooted.", camName)
-						bot.Send(m.Sender, rebotedResponse)
+						bot.Send(m.Sender, rebotedResponse,
+							&tb.ReplyMarkup{
+								ReplyKeyboard: startBotReplyKeys,
+							})
 					}
 				}
 
 			} else {
 				response := fmt.Sprintf("Sorry %s, there is no cam called '%s'.", senderName, camName)
-				bot.Send(m.Sender, response)
+				bot.Send(m.Sender, response,
+					&tb.ReplyMarkup{
+						ReplyKeyboard: startBotReplyKeys,
+					})
 			}
 
 		} else {
 			response := fmt.Sprintf("Sorry %s, I don't know what are you talking about.", senderName)
-			bot.Send(m.Sender, response)
+			bot.Send(m.Sender, response,
+				&tb.ReplyMarkup{
+					ReplyKeyboard: startBotReplyKeys,
+				})
 		}
 	})
 
