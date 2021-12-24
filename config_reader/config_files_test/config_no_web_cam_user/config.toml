@@ -8,10 +8,9 @@ id = 12
 
 [telegram_bot.allowed_senders.bob]
 name = "Bob"
-id = 12
+id = 13
 
 [webcams]
 [webcams.cam01]
-ip = "10.10.10.34"
-user = "user"
-password = "pass"
+ip = "10.10.10.10"
+name= "cam1"

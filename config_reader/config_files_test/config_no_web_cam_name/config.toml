@@ -8,7 +8,7 @@ id = 12
 
 [telegram_bot.allowed_senders.bob]
 name = "Bob"
-id = 12
+id = 13
 
 [webcams]
 [webcams.cam01]
