@@ -18,7 +18,7 @@ For the time being, webcams can be rebooted only.
 
 ## Configuration
 
-This bot uses a config file which folder location is defined by environment variable *SECURITY_CAM_BOT_CONFIG_FILE_LOCATION*, inside this folder it must exists a file called *config.toml*.
+This bot uses a config file which folder location is defined by environment variable **SECURITY_CAM_BOT_CONFIG_FILE_LOCATION**, inside this folder it must exists a file called **config.toml**.
 
 ```toml
 [telegram_bot]
