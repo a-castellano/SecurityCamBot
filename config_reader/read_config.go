@@ -40,7 +40,7 @@ func ReadConfig() (Config, error) {
 
 	var envVariable string = "SECURITY_CAM_BOT_CONFIG_FILE_LOCATION"
 
-	requiredVariables := []string{"telegram_bot", "webcams"}
+	requiredVariables := []string{"telegram_bot", "webcams", "rabbitmq"}
 	telegramBotVariables := []string{"token", "allowed_senders"}
 	allowedSendersVariables := []string{"name", "id"}
 	webcamRequiredVariables := []string{"ip", "user", "password", "name"}
