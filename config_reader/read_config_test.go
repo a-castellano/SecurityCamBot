@@ -198,6 +198,30 @@ func TestProcessConfigNoRabbitUser(t *testing.T) {
 	}
 }
 
+func TestProcessConfigNoQueueName(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_no_receive_sanpshots_queue_name/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method without queue name should fail.")
+	} else {
+		if err.Error() != "Fatal error config: queue receive_sanpshot has no name." {
+			t.Errorf("Error should be \"Fatal error config: queue receive_sanpshot has no name.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
+func TestProcessConfigNoQueue(t *testing.T) {
+	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_no_receive_sanpshots_queue/")
+	_, err := ReadConfig()
+	if err == nil {
+		t.Errorf("ReadConfig method without required queue should fail.")
+	} else {
+		if err.Error() != "Fatal error config: queue receive_sanpshot was not found." {
+			t.Errorf("Error should be \"Fatal error config: queue receive_sanpshot was not found.\" but error was '%s'.", err.Error())
+		}
+	}
+}
+
 func TestOKConfig(t *testing.T) {
 	os.Setenv("SECURITY_CAM_BOT_CONFIG_FILE_LOCATION", "./config_files_test/config_ok/")
 	config, err := ReadConfig()
@@ -222,5 +246,10 @@ func TestOKConfig(t *testing.T) {
 	if config.Webcams["cam2"].IP != "10.10.10.35" {
 		t.Errorf("TelegramBot cam02 should have IP 10.10.10.35. Returned: %s.", config.Webcams["cam2"].IP)
 	}
-
+	if config.Rabbitmq.User != "guest" {
+		t.Errorf("Rabbitmq user should be guest. Returned: %s.", config.Rabbitmq.User)
+	}
+	if config.Queues["send_sanpshot_commands"].Name != "incoming" {
+		t.Errorf("Queue send_sanpshot_commands name should be incoming. Returned: %s.", config.Queues["send_sanpshot_commands"].Name)
+	}
 }

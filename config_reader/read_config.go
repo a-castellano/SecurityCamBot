@@ -19,9 +19,22 @@ type TelegramAllowedSender struct {
 	ID   int
 }
 
+type Rabbitmq struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+}
+
+type Queue struct {
+	Name string
+}
+
 type Config struct {
 	TelegramBot TelegramBot
 	Webcams     map[string]webcam.Webcam
+	Rabbitmq    Rabbitmq
+	Queues      map[string]Queue
 }
 
 func contains(keys []string, keyName string) bool {
@@ -45,6 +58,7 @@ func ReadConfig() (Config, error) {
 	allowedSendersVariables := []string{"name", "id"}
 	webcamRequiredVariables := []string{"ip", "user", "password", "name"}
 	rabbitmqRequiredVariables := []string{"host", "port", "user", "password"}
+	rabbitmqRequiredQueues := []string{"send_sanpshot_commands", "receive_sanpshot"}
 
 	viper := viperLib.New()
 
@@ -193,10 +207,29 @@ func ReadConfig() (Config, error) {
 		}
 	}
 
+	for _, rabbitmqRequiredQueue := range rabbitmqRequiredQueues {
+		if !viper.IsSet("queues." + rabbitmqRequiredQueue) {
+			return config, errors.New("Fatal error config: queue " + rabbitmqRequiredQueue + " was not found.")
+		} else {
+			if !viper.IsSet("queues." + rabbitmqRequiredQueue + ".name") {
+				return config, errors.New("Fatal error config: queue " + rabbitmqRequiredQueue + " has no name.")
+			}
+		}
+	}
+
 	telegrambotConfig := TelegramBot{Token: viper.GetString("telegram_bot.token"), AllowedSenders: senders}
+
+	rabbitmqConfig := Rabbitmq{Host: viper.GetString("rabbitmq.host"), Port: viper.GetInt("rabbitmq.port"), User: viper.GetString("rabbitmq.user"), Password: viper.GetString("rabbitmq.password")}
 
 	config.TelegramBot = telegrambotConfig
 	config.Webcams = webcams
+	config.Rabbitmq = rabbitmqConfig
+	queues := make(map[string]Queue)
+	for _, rabbitmqRequiredQueue := range rabbitmqRequiredQueues {
+		queue := Queue{Name: viper.GetString("queues." + rabbitmqRequiredQueue + ".name")}
+		queues[rabbitmqRequiredQueue] = queue
+	}
+	config.Queues = queues
 
 	return config, nil
 }

@@ -1,0 +1,36 @@
+[telegram_bot]
+token = "token"
+
+[telegram_bot.allowed_senders]
+[telegram_bot.allowed_senders.alice]
+name = "Alice"
+id = 12
+
+[telegram_bot.allowed_senders.bob]
+name = "Bob"
+id = 13
+
+[webcams]
+[webcams.cam01]
+name= "cam1"
+ip = "10.10.10.34"
+user = "user"
+password = "pass"
+
+[webcams.cam02]
+name= "cam2"
+ip = "10.10.10.35"
+user = "user"
+password = "pass"
+
+[rabbitmq]
+host = "localhost"
+port = 5672
+user = "guest"
+password = "pass"
+
+[queues]
+[queues.send_sanpshot_commands]
+name = "incoming"
+
+[queues.receive_sanpshot]
