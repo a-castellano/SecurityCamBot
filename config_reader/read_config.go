@@ -44,6 +44,7 @@ func ReadConfig() (Config, error) {
 	telegramBotVariables := []string{"token", "allowed_senders"}
 	allowedSendersVariables := []string{"name", "id"}
 	webcamRequiredVariables := []string{"ip", "user", "password", "name"}
+	rabbitmqRequiredVariables := []string{"host", "port", "user", "password"}
 
 	viper := viperLib.New()
 
@@ -185,6 +186,13 @@ func ReadConfig() (Config, error) {
 	if len(webcams) == 0 {
 		return config, errors.New("Fatal error config: no webcams were found.")
 	}
+
+	for _, rabbitmqVariable := range rabbitmqRequiredVariables {
+		if !viper.IsSet("rabbitmq." + rabbitmqVariable) {
+			return config, errors.New("Fatal error config: no rabbitmq " + rabbitmqVariable + " was found.")
+		}
+	}
+
 	telegrambotConfig := TelegramBot{Token: viper.GetString("telegram_bot.token"), AllowedSenders: senders}
 
 	config.TelegramBot = telegrambotConfig
