@@ -60,8 +60,10 @@ func main() {
 	}
 
 	rebootAllCamsBtn := tb.ReplyButton{Text: "📷  Reboot Cameras"}
+	takeSnapshotBtn := tb.ReplyButton{Text: "📷  Take Snapshot"}
 	startBotReplyKeys := [][]tb.ReplyButton{
 		[]tb.ReplyButton{rebootAllCamsBtn},
+		[]tb.ReplyButton{takeSnapshotBtn},
 	}
 
 	rebootCamReplyButtons := []tb.ReplyButton{}
@@ -74,6 +76,17 @@ func main() {
 	rebootCamReplyKeys := [][]tb.ReplyButton{rebootCamReplyButtons}
 
 	rebootCamRegex := regexp.MustCompile(`Reboot (.*)$`)
+
+	takeSnapshotFromCamReplyButtons := []tb.ReplyButton{}
+	for webCamName := range botConfig.Webcams {
+		commandName := fmt.Sprintf("From %s", webCamName)
+		takeSnapshotFromCamBtn := tb.ReplyButton{Text: commandName}
+		takeSnapshotFromCamReplyButtons = append(takeSnapshotFromCamReplyButtons, takeSnapshotFromCamBtn)
+	}
+
+	takeSnapshotFromCamReplyKeys := [][]tb.ReplyButton{takeSnapshotFromCamReplyButtons}
+
+	//	takeSnapshotFromCamRegex := regexp.MustCompile(`From (.*)$`)
 
 	bot.Handle("/hello", func(m *tb.Message) {
 		senderID := int(m.Sender.ID)
@@ -102,9 +115,21 @@ func main() {
 		logMsg := fmt.Sprintf("Manage Cameras command received from sender %s.", senderName)
 		log.Println(logMsg)
 
-		response := "Select a cemera to be rebooted."
+		response := "Select a camera to be rebooted."
 		bot.Send(m.Sender, response, &tb.ReplyMarkup{
 			ReplyKeyboard: rebootCamReplyKeys,
+		})
+	})
+
+	bot.Handle("📷  Take Snapshot", func(m *tb.Message) {
+		senderID := int(m.Sender.ID)
+		senderName := botConfig.TelegramBot.AllowedSenders[senderID].Name
+		logMsg := fmt.Sprintf("Take snapshot from cameras command received from sender %s.", senderName)
+		log.Println(logMsg)
+
+		response := "From which camera?"
+		bot.Send(m.Sender, response, &tb.ReplyMarkup{
+			ReplyKeyboard: takeSnapshotFromCamReplyKeys,
 		})
 	})
 
@@ -157,11 +182,16 @@ func main() {
 			}
 
 		} else {
-			response := fmt.Sprintf("Sorry %s, I don't know what are you talking about.", senderName)
-			bot.Send(m.Sender, response,
-				&tb.ReplyMarkup{
-					ReplyKeyboard: startBotReplyKeys,
-				})
+
+			if strings.HasPrefix(stringText, "From ") {
+
+			} else {
+				response := fmt.Sprintf("Sorry %s, I don't know what are you talking about.", senderName)
+				bot.Send(m.Sender, response,
+					&tb.ReplyMarkup{
+						ReplyKeyboard: startBotReplyKeys,
+					})
+			}
 		}
 	})
 
