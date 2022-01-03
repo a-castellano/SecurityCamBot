@@ -29,7 +29,7 @@ func TestSendJob(t *testing.T) {
 
 	targetWebcam := webcam.Webcam{IP: "10.10.10.10", User: "user", Password: "pass"}
 
-	sendJobErr := SendJob(rabbitConfig, queueName, targetWebcam)
+	sendJobErr := SendJob(rabbitConfig, queueName, targetWebcam, 1)
 
 	if sendJobErr != nil {
 		t.Errorf("TestSendJob shouldn't fail, error was \"%s\"", sendJobErr.Error())
