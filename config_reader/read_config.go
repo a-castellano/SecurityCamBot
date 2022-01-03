@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"reflect"
 
@@ -24,6 +25,12 @@ type Rabbitmq struct {
 	Port     int
 	User     string
 	Password string
+}
+
+func (r Rabbitmq) GetDial() string {
+
+	dialString := fmt.Sprintf("amqp://%s:%s@%s:%d/", r.User, r.Password, r.Host, r.Port)
+	return dialString
 }
 
 type Queue struct {

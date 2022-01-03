@@ -2,6 +2,7 @@ image: registry.windmaker.net:5005/a-castellano/limani/base_golang_1_17:20211213
 
 stages:
     - unit_tests
+    - integration_tests
     - coverage
     - report
     - scan
@@ -60,6 +61,22 @@ lint_code:
     - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
   script:
     - make lint
+
+integration_tests:
+  stage: integration_tests
+  services:
+    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202112131727
+      alias: rabbitmq
+  before_script:
+    - export CC=/usr/bin/clang
+    - export GOPATH="$(pwd)/go"
+    - mkdir -p "$(pwd)/go"
+    - go env -w GOPATH="$(pwd)/go"
+    - mkdir -p $GOPATH/src/github.com/a-castellano
+    - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/security-cam-bot
+    - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
+  script:
+    - make test_integration
 
 coverage:
   stage: coverage
