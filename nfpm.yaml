@@ -19,7 +19,7 @@ homepage: "https://git.windmaker.net/a-castellano/SecurityCamBot"
 license: "BSD 2"
 changelog: "changelog.yaml"
 contents:
-- src: ./main
+- src: ./SecurityCamBot
   dst: /usr/local/bin/windmaker-security-cam-bot
 - src: ./packaging/deb/default/windmaker-security-cam-bot
   dst: /etc/default/windmaker-security-cam-bot

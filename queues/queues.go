@@ -3,7 +3,6 @@ package queues
 import (
 	"crypto/rand"
 	"encoding/base32"
-	"fmt"
 
 	config "github.com/a-castellano/SecurityCamBot/config_reader"
 	jobs "github.com/a-castellano/WebCamSnapshotWorker/jobs"
@@ -136,7 +135,6 @@ func ReceiveSnapshotJobs(rabbitmqConfig config.Rabbitmq, jobQueue string, bot *t
 
 			decodedJob, decodeErr := jobs.DecodeJob(job.Body)
 			if decodeErr == nil {
-				fmt.Println(decodedJob)
 				snapshot := &tb.Photo{File: tb.FromDisk(decodedJob.SnapshotPath)}
 				user := &tb.User{ID: int64(decodedJob.Sender)}
 				bot.Send(user, snapshot)
