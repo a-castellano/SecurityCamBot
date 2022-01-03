@@ -3,7 +3,7 @@ module github.com/a-castellano/SecurityCamBot
 go 1.16
 
 require (
-	github.com/a-castellano/WebCamSnapshotWorker v0.0.0-20220102104709-d63d2be22d35
+	github.com/a-castellano/WebCamSnapshotWorker v0.0.0-20220103150411-4df5af3b2299
 	github.com/a-castellano/reolink-manager v0.0.0-20211114195326-317e5ae8c61c
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

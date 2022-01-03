@@ -57,6 +57,8 @@ github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/a-castellano/WebCamSnapshotWorker v0.0.0-20220102104709-d63d2be22d35 h1:RUnngf3X2z7hCZEXx/4ZDfMUMSabM415Ec+XN7N/EDI=
 github.com/a-castellano/WebCamSnapshotWorker v0.0.0-20220102104709-d63d2be22d35/go.mod h1:tFzCJpYFxuM9xXOBpfYzmykN2nCJuOLJ97c/diPrYOA=
+github.com/a-castellano/WebCamSnapshotWorker v0.0.0-20220103150411-4df5af3b2299 h1:szqdlEac7l43e7A9KKG76+M0mao4s0YrpYk8RxqkQmI=
+github.com/a-castellano/WebCamSnapshotWorker v0.0.0-20220103150411-4df5af3b2299/go.mod h1:tFzCJpYFxuM9xXOBpfYzmykN2nCJuOLJ97c/diPrYOA=
 github.com/a-castellano/reolink-manager v0.0.0-20211114195326-317e5ae8c61c h1:X/8/UkIQRmCCbXgAoUzjC91vJDY02CpAfaIwi+km8hk=
 github.com/a-castellano/reolink-manager v0.0.0-20211114195326-317e5ae8c61c/go.mod h1:FjAevOpIfEwUouJASzj5VwcC6IYbNRSy8s+8XAIiRpE=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=

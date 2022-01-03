@@ -3,11 +3,13 @@ package queues
 import (
 	"crypto/rand"
 	"encoding/base32"
+	"fmt"
 
 	config "github.com/a-castellano/SecurityCamBot/config_reader"
 	jobs "github.com/a-castellano/WebCamSnapshotWorker/jobs"
 	webcam "github.com/a-castellano/reolink-manager/webcam"
 	"github.com/streadway/amqp"
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func generateRandomString() (string, error) {
@@ -19,9 +21,9 @@ func generateRandomString() (string, error) {
 	return base32.StdEncoding.EncodeToString(randomBytes)[:32], nil
 }
 
-func SendJob(rabbitmqConfig config.Rabbitmq, jobQueue string, webcamInfo webcam.Webcam) error {
+func SendJob(rabbitmqConfig config.Rabbitmq, jobQueue string, webcamInfo webcam.Webcam, senderID int) error {
 
-	newJob := jobs.SnapshotJob{Errored: false, Finished: false, IP: webcamInfo.IP, User: webcamInfo.User, Password: webcamInfo.Password}
+	newJob := jobs.SnapshotJob{Errored: false, Finished: false, IP: webcamInfo.IP, User: webcamInfo.User, Password: webcamInfo.Password, Sender: senderID}
 
 	newJob.ID, _ = generateRandomString()
 	// For the time being Port and StreamPath are hardcoded
@@ -72,5 +74,79 @@ func SendJob(rabbitmqConfig config.Rabbitmq, jobQueue string, webcamInfo webcam.
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func ReceiveSnapshotJobs(rabbitmqConfig config.Rabbitmq, jobQueue string, bot *tb.Bot) error {
+
+	conn, errDial := amqp.Dial(rabbitmqConfig.GetDial())
+	defer conn.Close()
+
+	if errDial != nil {
+		return errDial
+	}
+
+	channel, errChannel := conn.Channel()
+	defer channel.Close()
+	if errChannel != nil {
+		return errChannel
+	}
+
+	_, errQueue := channel.QueueDeclare(
+		jobQueue,
+		true,  // Durable
+		false, // DeleteWhenUnused
+		false, // Exclusive
+		false, // NoWait
+		nil,   // arguments
+	)
+
+	if errQueue != nil {
+		return errQueue
+	}
+
+	errChannelQos := channel.Qos(
+		1,     // prefetch count
+		0,     // prefetch size
+		false, // global
+	)
+
+	if errChannelQos != nil {
+		return errChannelQos
+	}
+
+	jobsToProcess, errJobsToProcess := channel.Consume(
+		jobQueue,
+		"",    // consumer
+		false, // auto-ack
+		false, // exclusive
+		false, // no-local
+		false, // no-wait
+		nil,   // args
+	)
+
+	if errJobsToProcess != nil {
+		return errJobsToProcess
+	}
+
+	processJobs := make(chan bool)
+
+	go func() {
+		for job := range jobsToProcess {
+
+			decodedJob, decodeErr := jobs.DecodeJob(job.Body)
+			if decodeErr == nil {
+				fmt.Println(decodedJob)
+				snapshot := &tb.Photo{File: tb.FromDisk(decodedJob.SnapshotPath)}
+				user := &tb.User{ID: int64(decodedJob.Sender)}
+				bot.Send(user, snapshot)
+				job.Ack(false)
+			}
+		}
+		return
+	}()
+
+	<-processJobs
+
 	return nil
 }
