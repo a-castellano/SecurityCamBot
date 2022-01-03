@@ -141,7 +141,7 @@ build_package:
     - cd $GOPATH/src/github.com/a-castellano/security-cam-bot
   script:
     - make build
-    - ls -lahrt
+    - cp changelog.yml changelog.yaml
     - nfpm package --packager deb
     - mkdir deb_package
     - mv *.deb deb_package/
