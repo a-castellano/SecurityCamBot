@@ -19,7 +19,7 @@ password = "pass"
 
 [webcams.cam02]
 name= "cam2"
-ip = "10.10.10.34"
+ip = "10.10.10.35"
 user = "user"
 password = "pass"
 
@@ -34,4 +34,3 @@ password = "pass"
 name = "incoming"
 
 [queues.receive_sanpshot]
-name = "outgoing"

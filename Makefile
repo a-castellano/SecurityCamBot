@@ -1,4 +1,4 @@
-PROJECT_NAME := "security-cam-bot"
+PROJECT_NAME := "SecurityCamBot"
 PKG := "github.com/a-castellano/$(PROJECT_NAME)"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
@@ -29,7 +29,7 @@ coverhtml: ## Generate global code coverage report in HTML
 	./scripts/coverage.sh html;
 
 build: ## Build the binary file
-	@go build -v main.go
+	@go build -i -v $(PKG)
 
 clean: ## Remove previous build
 	@rm -f $(PROJECT_NAME)

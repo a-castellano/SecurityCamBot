@@ -14,3 +14,16 @@ id = 13
 [webcams.cam01]
 ip = "10.10.10.10"
 name= "cam1"
+
+[rabbitmq]
+host = "localhost"
+port = 5672
+user = "guest"
+password = "pass"
+
+[queues]
+[queues.send_sanpshot_commands]
+name = "incoming"
+
+[queues.receive_sanpshot]
+name = "outgoing"

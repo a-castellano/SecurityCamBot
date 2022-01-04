@@ -10,6 +10,7 @@ import (
 	"time"
 
 	config "github.com/a-castellano/SecurityCamBot/config_reader"
+	queues "github.com/a-castellano/SecurityCamBot/queues"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -60,8 +61,10 @@ func main() {
 	}
 
 	rebootAllCamsBtn := tb.ReplyButton{Text: "📷  Reboot Cameras"}
+	takeSnapshotBtn := tb.ReplyButton{Text: "📷  Take Snapshot"}
 	startBotReplyKeys := [][]tb.ReplyButton{
 		[]tb.ReplyButton{rebootAllCamsBtn},
+		[]tb.ReplyButton{takeSnapshotBtn},
 	}
 
 	rebootCamReplyButtons := []tb.ReplyButton{}
@@ -74,6 +77,18 @@ func main() {
 	rebootCamReplyKeys := [][]tb.ReplyButton{rebootCamReplyButtons}
 
 	rebootCamRegex := regexp.MustCompile(`Reboot (.*)$`)
+	snapshotCamRegex := regexp.MustCompile(`From (.*)$`)
+
+	takeSnapshotFromCamReplyButtons := []tb.ReplyButton{}
+	for webCamName := range botConfig.Webcams {
+		commandName := fmt.Sprintf("From %s", webCamName)
+		takeSnapshotFromCamBtn := tb.ReplyButton{Text: commandName}
+		takeSnapshotFromCamReplyButtons = append(takeSnapshotFromCamReplyButtons, takeSnapshotFromCamBtn)
+	}
+
+	takeSnapshotFromCamReplyKeys := [][]tb.ReplyButton{takeSnapshotFromCamReplyButtons}
+
+	//	takeSnapshotFromCamRegex := regexp.MustCompile(`From (.*)$`)
 
 	bot.Handle("/hello", func(m *tb.Message) {
 		senderID := int(m.Sender.ID)
@@ -102,9 +117,21 @@ func main() {
 		logMsg := fmt.Sprintf("Manage Cameras command received from sender %s.", senderName)
 		log.Println(logMsg)
 
-		response := "Select a cemera to be rebooted."
+		response := "Select a camera to be rebooted."
 		bot.Send(m.Sender, response, &tb.ReplyMarkup{
 			ReplyKeyboard: rebootCamReplyKeys,
+		})
+	})
+
+	bot.Handle("📷  Take Snapshot", func(m *tb.Message) {
+		senderID := int(m.Sender.ID)
+		senderName := botConfig.TelegramBot.AllowedSenders[senderID].Name
+		logMsg := fmt.Sprintf("Take snapshot from cameras command received from sender %s.", senderName)
+		log.Println(logMsg)
+
+		response := "From which camera?"
+		bot.Send(m.Sender, response, &tb.ReplyMarkup{
+			ReplyKeyboard: takeSnapshotFromCamReplyKeys,
 		})
 	})
 
@@ -133,7 +160,7 @@ func main() {
 				} else {
 					rebootErr := webcam.Reboot(client)
 					if rebootErr != nil {
-						cantRebotedResponse := fmt.Sprintf("Cannot Rebbot Webcam called '%s' has been rebooted.", camName)
+						cantRebotedResponse := fmt.Sprintf("Cannot Reboot Webcam called '%s'.", camName)
 						bot.Send(m.Sender, cantRebotedResponse,
 							&tb.ReplyMarkup{
 								ReplyKeyboard: startBotReplyKeys,
@@ -157,13 +184,49 @@ func main() {
 			}
 
 		} else {
-			response := fmt.Sprintf("Sorry %s, I don't know what are you talking about.", senderName)
-			bot.Send(m.Sender, response,
-				&tb.ReplyMarkup{
-					ReplyKeyboard: startBotReplyKeys,
-				})
+
+			if strings.HasPrefix(stringText, "From ") {
+				camName := snapshotCamRegex.FindStringSubmatch(stringText)[1]
+				if targetWebcam, ok := botConfig.Webcams[camName]; ok {
+
+					aboutToSnapshotResponse := fmt.Sprintf("About to send a Snapshot job for Webcam called '%s'.", camName)
+					log.Println(aboutToSnapshotResponse)
+					sendJobErr := queues.SendJob(botConfig.Rabbitmq, botConfig.Queues["send_sanpshot_commands"].Name, targetWebcam, senderID)
+					if sendJobErr != nil {
+						log.Println(sendJobErr)
+						snapshotJobErrResponse := fmt.Sprintf("Cannot send snapshot job for webcam called '%s', error was '%s'.", camName, sendJobErr.Error())
+						bot.Send(m.Sender, snapshotJobErrResponse,
+							&tb.ReplyMarkup{
+								ReplyKeyboard: startBotReplyKeys,
+							})
+
+					} else {
+						snapshotJobSuccessResponse := fmt.Sprintf("Snapshot job for webcam called '%s', has been sended.", camName)
+						log.Println(snapshotJobSuccessResponse)
+						bot.Send(m.Sender, snapshotJobSuccessResponse,
+							&tb.ReplyMarkup{
+								ReplyKeyboard: startBotReplyKeys,
+							})
+
+					}
+				} else {
+					response := fmt.Sprintf("Sorry %s, there is no cam called '%s'.", senderName, camName)
+					bot.Send(m.Sender, response,
+						&tb.ReplyMarkup{
+							ReplyKeyboard: startBotReplyKeys,
+						})
+				}
+
+			} else {
+				response := fmt.Sprintf("Sorry %s, I don't know what are you talking about.", senderName)
+				bot.Send(m.Sender, response,
+					&tb.ReplyMarkup{
+						ReplyKeyboard: startBotReplyKeys,
+					})
+			}
 		}
 	})
 
+	go queues.ReceiveSnapshotJobs(botConfig.Rabbitmq, botConfig.Queues["receive_sanpshot"].Name, bot)
 	bot.Start()
 }

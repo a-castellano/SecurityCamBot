@@ -19,14 +19,13 @@ password = "pass"
 
 [webcams.cam02]
 name= "cam2"
-ip = "10.10.10.34"
+ip = "10.10.10.35"
 user = "user"
 password = "pass"
 
 [rabbitmq]
 host = "localhost"
 port = 5672
-user = "guest"
 password = "pass"
 
 [queues]

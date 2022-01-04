@@ -2,7 +2,7 @@
 Description=Windmaker Security Cam Bot
 Documentation=https://git.windmaker.net/a-castellano/SecurityCamBot
 Wants=network-online.target
-After=network-online.target
+After=network-online.target rabbitmq-server.service
 
 [Service]
 EnvironmentFile=/etc/default/windmaker-security-cam-bot
