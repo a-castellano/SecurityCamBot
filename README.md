@@ -45,6 +45,19 @@ name= "cam2"
 ip = "10.10.10.35"
 user = "user"
 password = "pass"
+
+[rabbitmq]
+host = "localhost"
+port = 5672
+user = "guest"
+password = "guest"
+
+[queues]
+[queues.send_sanpshot_commands]
+name = "sendsnapshotjobs"
+
+[queues.receive_sanpshot]
+name = "snapshots"
 ```
 
 Config files must include the following sections:
@@ -64,6 +77,20 @@ Webcams to manage must be set in this section.
 * user -> Webcam user
 * password -> Webcam password
 
+### Rabbitmq
+
+Snapshot jobs are sended to [WebCamSnapshotWorker](https://git.windmaker.net/a-castellano/WebCamSnapshotWorker) through Rabbitmq queues.
+* host -> Rabbitmq host
+* port -> Rabbitmq port
+* user -> Rabbitmq user
+* password -> User's password
+
+### Queues
+
+This bots requires tew queues for the time being, each queue needs a name.
+* send_sanpshot_commands -> Queue for sending snapshot jobs.
+* receive_sanpshot -> Queue for receiving finnished snapshot jobs from [WebCamSnapshotWorker](https://git.windmaker.net/a-castellano/WebCamSnapshotWorker)
+
 ## Systemd service setup
 
 After saving config in **/etc/windmaker-security-cam-bot/config.toml** systemd service can be enabled:
@@ -75,7 +102,7 @@ sudo /bin/systemctl start windmaker-security-cam-bot
 
 ## Logging
 
-This bot wites logs to syslog:
+This bot writes logs to syslog:
 ```
 Dec  5 15:51:29 metatron security-cam-bot[8220]: Blocked message received from sender 112897183.
 Dec  5 15:56:40 metatron security-cam-bot[8962]: /hello received from sender Bob.
