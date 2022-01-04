@@ -18,3 +18,5 @@
 config.toml
 main
 *.deb
+
+SecurityCamBot
