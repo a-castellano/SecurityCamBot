@@ -27,3 +27,10 @@ name = "incoming"
 
 [queues.receive_sanpshot]
 name = "outgoing"
+
+[queues.alarmwatcher]
+name = "alarmwatcher"
+
+[alarmmanager]
+host = "localhost"
+port = 3000]

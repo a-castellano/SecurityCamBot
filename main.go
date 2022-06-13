@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	apiwatcher "github.com/a-castellano/AlarmStatusWatcher/apiwatcher"
 	config "github.com/a-castellano/SecurityCamBot/config_reader"
 	queues "github.com/a-castellano/SecurityCamBot/queues"
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -60,11 +61,22 @@ func main() {
 		return
 	}
 
+	watcher := apiwatcher.APIWatcher{Host: botConfig.AlarmManager.Host, Port: botConfig.AlarmManager.Port}
+	alarmManagerRequester := apiwatcher.Requester{Client: client}
+
+	apiInfo, apiInfoErr := watcher.ShowInfo(alarmManagerRequester)
+	if apiInfoErr != nil {
+		log.Fatal(apiInfoErr)
+	}
+	fmt.Println(apiInfo)
+
 	rebootAllCamsBtn := tb.ReplyButton{Text: "📷  Reboot Cameras"}
 	takeSnapshotBtn := tb.ReplyButton{Text: "📷  Take Snapshot"}
+	manageAlarmBtn := tb.ReplyButton{Text: "🔔  Alarm"}
 	startBotReplyKeys := [][]tb.ReplyButton{
 		[]tb.ReplyButton{rebootAllCamsBtn},
 		[]tb.ReplyButton{takeSnapshotBtn},
+		[]tb.ReplyButton{manageAlarmBtn},
 	}
 
 	rebootCamReplyButtons := []tb.ReplyButton{}
@@ -88,7 +100,14 @@ func main() {
 
 	takeSnapshotFromCamReplyKeys := [][]tb.ReplyButton{takeSnapshotFromCamReplyButtons}
 
-	//	takeSnapshotFromCamRegex := regexp.MustCompile(`From (.*)$`)
+	manageAlarmReplyButtons := []tb.ReplyButton{}
+	for _, alarmInfo := range apiInfo.DevicesInfo {
+		commandName := fmt.Sprintf("Manage %s", alarmInfo.Name)
+		manageAlarmBtn := tb.ReplyButton{Text: commandName}
+		manageAlarmReplyButtons = append(manageAlarmReplyButtons, manageAlarmBtn)
+	}
+
+	manageAlarmReplyKeys := [][]tb.ReplyButton{manageAlarmReplyButtons}
 
 	bot.Handle("/hello", func(m *tb.Message) {
 		senderID := int(m.Sender.ID)
@@ -120,6 +139,18 @@ func main() {
 		response := "Select a camera to be rebooted."
 		bot.Send(m.Sender, response, &tb.ReplyMarkup{
 			ReplyKeyboard: rebootCamReplyKeys,
+		})
+	})
+
+	bot.Handle("🔔  Alarm", func(m *tb.Message) {
+		senderID := int(m.Sender.ID)
+		senderName := botConfig.TelegramBot.AllowedSenders[senderID].Name
+		logMsg := fmt.Sprintf("Manage Alarm command received from sender %s.", senderName)
+		log.Println(logMsg)
+
+		response := "Select an Alarm to be manage."
+		bot.Send(m.Sender, response, &tb.ReplyMarkup{
+			ReplyKeyboard: manageAlarmReplyKeys,
 		})
 	})
 

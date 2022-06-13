@@ -34,3 +34,10 @@ password = "pass"
 name = "incoming"
 
 [queues.receive_sanpshot]
+
+[queues.alarmwatcher]
+name = "alarmwatcher"
+
+[alarmmanager]
+host = "localhost"
+port = 3000]

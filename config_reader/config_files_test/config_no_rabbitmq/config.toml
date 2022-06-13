@@ -22,3 +22,10 @@ name= "cam2"
 ip = "10.10.10.35"
 user = "user"
 password = "pass"
+
+[queues.alarmwatcher]
+name = "alarmwatcher"
+
+[alarmmanager]
+host = "localhost"
+port = 3000]

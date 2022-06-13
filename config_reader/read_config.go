@@ -27,6 +27,11 @@ type Rabbitmq struct {
 	Password string
 }
 
+type AlarmManager struct {
+	Host string
+	Port int
+}
+
 func (r Rabbitmq) GetDial() string {
 
 	dialString := fmt.Sprintf("amqp://%s:%s@%s:%d/", r.User, r.Password, r.Host, r.Port)
@@ -38,10 +43,11 @@ type Queue struct {
 }
 
 type Config struct {
-	TelegramBot TelegramBot
-	Webcams     map[string]webcam.Webcam
-	Rabbitmq    Rabbitmq
-	Queues      map[string]Queue
+	TelegramBot  TelegramBot
+	Webcams      map[string]webcam.Webcam
+	Rabbitmq     Rabbitmq
+	Queues       map[string]Queue
+	AlarmManager AlarmManager
 }
 
 func contains(keys []string, keyName string) bool {
@@ -65,7 +71,8 @@ func ReadConfig() (Config, error) {
 	allowedSendersVariables := []string{"name", "id"}
 	webcamRequiredVariables := []string{"ip", "user", "password", "name"}
 	rabbitmqRequiredVariables := []string{"host", "port", "user", "password"}
-	rabbitmqRequiredQueues := []string{"send_sanpshot_commands", "receive_sanpshot"}
+	alarmManagerRequiredVariables := []string{"host", "port"}
+	rabbitmqRequiredQueues := []string{"send_sanpshot_commands", "receive_sanpshot", "alarmwatcher"}
 
 	viper := viperLib.New()
 
@@ -237,6 +244,13 @@ func ReadConfig() (Config, error) {
 		queues[rabbitmqRequiredQueue] = queue
 	}
 	config.Queues = queues
+	for _, alarmManagerRequiredVariable := range alarmManagerRequiredVariables {
+		if !viper.IsSet("alarmmanager." + alarmManagerRequiredVariable) {
+			return config, errors.New("Fatal error config: no alarmmanager " + alarmManagerRequiredVariable + " was found.")
+		}
+	}
+	config.AlarmManager.Host = viper.GetString("alarmmanager.host")
+	config.AlarmManager.Port = viper.GetInt("alarmmanager.port")
 
 	return config, nil
 }
