@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"log/syslog"
@@ -68,7 +69,6 @@ func main() {
 	if apiInfoErr != nil {
 		log.Fatal(apiInfoErr)
 	}
-	fmt.Println(apiInfo)
 
 	rebootAllCamsBtn := tb.ReplyButton{Text: "📷  Reboot Cameras"}
 	takeSnapshotBtn := tb.ReplyButton{Text: "📷  Take Snapshot"}
@@ -90,6 +90,10 @@ func main() {
 
 	rebootCamRegex := regexp.MustCompile(`Reboot (.*)$`)
 	snapshotCamRegex := regexp.MustCompile(`From (.*)$`)
+	manageAlarmRegex := regexp.MustCompile(`Manage alarm (.*)$`)
+	checkAlarmStatusRegex := regexp.MustCompile(`Check (.*) status\.$`)
+	changeAlarmStatusRegex := regexp.MustCompile(`Change (.*) status\.$`)
+	setAlarmStatusRegex := regexp.MustCompile(`Set (.*) to (.*)\.$`)
 
 	takeSnapshotFromCamReplyButtons := []tb.ReplyButton{}
 	for webCamName := range botConfig.Webcams {
@@ -101,8 +105,10 @@ func main() {
 	takeSnapshotFromCamReplyKeys := [][]tb.ReplyButton{takeSnapshotFromCamReplyButtons}
 
 	manageAlarmReplyButtons := []tb.ReplyButton{}
-	for _, alarmInfo := range apiInfo.DevicesInfo {
-		commandName := fmt.Sprintf("Manage %s", alarmInfo.Name)
+	alarmNameToIDMap := make(map[string]string)
+	for alarmID, alarmInfo := range apiInfo.DevicesInfo {
+		alarmNameToIDMap[alarmInfo.Name] = alarmID
+		commandName := fmt.Sprintf("Manage alarm %s", alarmInfo.Name)
 		manageAlarmBtn := tb.ReplyButton{Text: commandName}
 		manageAlarmReplyButtons = append(manageAlarmReplyButtons, manageAlarmBtn)
 	}
@@ -167,12 +173,14 @@ func main() {
 	})
 
 	bot.Handle(tb.OnText, func(m *tb.Message) {
+		var textMatch bool = false
 		senderID := int(m.Sender.ID)
 		senderName := botConfig.TelegramBot.AllowedSenders[senderID].Name
 		logMsg := fmt.Sprintf("Received text  unhandled message from sender %s.", senderName)
 		log.Println(logMsg)
 		stringText := string(m.Text)
 		if strings.HasPrefix(stringText, "Reboot ") {
+			textMatch = true
 
 			camName := rebootCamRegex.FindStringSubmatch(stringText)[1]
 			if _, ok := botConfig.Webcams[camName]; ok {
@@ -214,47 +222,149 @@ func main() {
 					})
 			}
 
-		} else {
+		}
 
-			if strings.HasPrefix(stringText, "From ") {
-				camName := snapshotCamRegex.FindStringSubmatch(stringText)[1]
-				if targetWebcam, ok := botConfig.Webcams[camName]; ok {
+		if strings.HasPrefix(stringText, "From ") {
+			textMatch = true
+			camName := snapshotCamRegex.FindStringSubmatch(stringText)[1]
+			if targetWebcam, ok := botConfig.Webcams[camName]; ok {
 
-					aboutToSnapshotResponse := fmt.Sprintf("About to send a Snapshot job for Webcam called '%s'.", camName)
-					log.Println(aboutToSnapshotResponse)
-					sendJobErr := queues.SendJob(botConfig.Rabbitmq, botConfig.Queues["send_sanpshot_commands"].Name, targetWebcam, senderID)
-					if sendJobErr != nil {
-						log.Println(sendJobErr)
-						snapshotJobErrResponse := fmt.Sprintf("Cannot send snapshot job for webcam called '%s', error was '%s'.", camName, sendJobErr.Error())
-						bot.Send(m.Sender, snapshotJobErrResponse,
-							&tb.ReplyMarkup{
-								ReplyKeyboard: startBotReplyKeys,
-							})
-
-					} else {
-						snapshotJobSuccessResponse := fmt.Sprintf("Snapshot job for webcam called '%s', has been sended.", camName)
-						log.Println(snapshotJobSuccessResponse)
-						bot.Send(m.Sender, snapshotJobSuccessResponse,
-							&tb.ReplyMarkup{
-								ReplyKeyboard: startBotReplyKeys,
-							})
-
-					}
-				} else {
-					response := fmt.Sprintf("Sorry %s, there is no cam called '%s'.", senderName, camName)
-					bot.Send(m.Sender, response,
+				aboutToSnapshotResponse := fmt.Sprintf("About to send a Snapshot job for Webcam called '%s'.", camName)
+				log.Println(aboutToSnapshotResponse)
+				sendJobErr := queues.SendJob(botConfig.Rabbitmq, botConfig.Queues["send_sanpshot_commands"].Name, targetWebcam, senderID)
+				if sendJobErr != nil {
+					log.Println(sendJobErr)
+					snapshotJobErrResponse := fmt.Sprintf("Cannot send snapshot job for webcam called '%s', error was '%s'.", camName, sendJobErr.Error())
+					bot.Send(m.Sender, snapshotJobErrResponse,
 						&tb.ReplyMarkup{
 							ReplyKeyboard: startBotReplyKeys,
 						})
-				}
 
+				} else {
+					snapshotJobSuccessResponse := fmt.Sprintf("Snapshot job for webcam called '%s', has been sended.", camName)
+					log.Println(snapshotJobSuccessResponse)
+					bot.Send(m.Sender, snapshotJobSuccessResponse,
+						&tb.ReplyMarkup{
+							ReplyKeyboard: startBotReplyKeys,
+						})
+
+				}
 			} else {
-				response := fmt.Sprintf("Sorry %s, I don't know what are you talking about.", senderName)
+				response := fmt.Sprintf("Sorry %s, there is no cam called '%s'.", senderName, camName)
 				bot.Send(m.Sender, response,
 					&tb.ReplyMarkup{
 						ReplyKeyboard: startBotReplyKeys,
 					})
 			}
+
+		}
+
+		if strings.HasPrefix(stringText, "Manage alarm ") {
+			textMatch = true
+			alarmName := manageAlarmRegex.FindStringSubmatch(stringText)[1]
+			log.Println(alarmName, alarmNameToIDMap[alarmName])
+
+			manageSelectedAlarmReplyButtons := []tb.ReplyButton{}
+			manageSelectedAlarmBtnName := fmt.Sprintf("Check %s status.", alarmName)
+			manageSelectedAlarmBtn := tb.ReplyButton{Text: manageSelectedAlarmBtnName}
+			manageSelectedAlarmReplyButtons = append(manageSelectedAlarmReplyButtons, manageSelectedAlarmBtn)
+			manageSelectedAlarmBtnChangeName := fmt.Sprintf("Change %s status.", alarmName)
+			manageSelectedAlarmBtnChange := tb.ReplyButton{Text: manageSelectedAlarmBtnChangeName}
+			manageSelectedAlarmReplyButtons = append(manageSelectedAlarmReplyButtons, manageSelectedAlarmBtnChange)
+			response := "What do yuo want to do?"
+
+			manageSelectedAlarmReplyKeys := [][]tb.ReplyButton{manageSelectedAlarmReplyButtons}
+			bot.Send(m.Sender, response,
+				&tb.ReplyMarkup{
+					ReplyKeyboard: manageSelectedAlarmReplyKeys,
+				})
+
+		}
+
+		if strings.HasPrefix(stringText, "Check ") {
+			textMatch = true
+			alarmName := checkAlarmStatusRegex.FindStringSubmatch(stringText)[1]
+			log.Println(alarmName, alarmNameToIDMap[alarmName])
+			apiInfo, apiInfoErr = watcher.ShowInfo(alarmManagerRequester)
+			if apiInfoErr != nil {
+				response := fmt.Sprintf("Error checking alarm status: %s", apiInfoErr.Error())
+				bot.Send(m.Sender, response,
+					&tb.ReplyMarkup{
+						ReplyKeyboard: startBotReplyKeys,
+					})
+
+			} else {
+				mode := apiInfo.DevicesInfo[alarmNameToIDMap[alarmName]].Mode
+				if mode == "home" {
+					mode = "Home Armed"
+				}
+				response := fmt.Sprintf("Alarm is %s.", mode)
+				bot.Send(m.Sender, response,
+					&tb.ReplyMarkup{
+						ReplyKeyboard: startBotReplyKeys,
+					})
+			}
+
+		}
+
+		if strings.HasPrefix(stringText, "Change ") {
+			textMatch = true
+			alarmName := changeAlarmStatusRegex.FindStringSubmatch(stringText)[1]
+			log.Println(alarmName, alarmNameToIDMap[alarmName])
+			response := fmt.Sprintf("Set %s to:", alarmName)
+			setSelectedAlarmReplyButtons := []tb.ReplyButton{}
+			setSelectedAlarmDisarmedBtnName := fmt.Sprintf("Set %s to Disarmed.", alarmName)
+			setSelectedAlarmDisarmedBtn := tb.ReplyButton{Text: setSelectedAlarmDisarmedBtnName}
+			setSelectedAlarmReplyButtons = append(setSelectedAlarmReplyButtons, setSelectedAlarmDisarmedBtn)
+			setSelectedAlarmArmedBtnName := fmt.Sprintf("Set %s to Armed.", alarmName)
+			setSelectedAlarmArmedBtn := tb.ReplyButton{Text: setSelectedAlarmArmedBtnName}
+			setSelectedAlarmReplyButtons = append(setSelectedAlarmReplyButtons, setSelectedAlarmArmedBtn)
+			setSelectedAlarmHomeArmedBtnName := fmt.Sprintf("Set %s to HomeArmed.", alarmName)
+			setSelectedAlarmHomeArmedBtn := tb.ReplyButton{Text: setSelectedAlarmHomeArmedBtnName}
+			setSelectedAlarmReplyButtons = append(setSelectedAlarmReplyButtons, setSelectedAlarmHomeArmedBtn)
+
+			setSelectedAlarmReplyKeys := [][]tb.ReplyButton{setSelectedAlarmReplyButtons}
+			bot.Send(m.Sender, response,
+				&tb.ReplyMarkup{
+					ReplyKeyboard: setSelectedAlarmReplyKeys,
+				})
+
+		}
+
+		if strings.HasPrefix(stringText, "Set ") {
+			textMatch = true
+			alarmName := setAlarmStatusRegex.FindStringSubmatch(stringText)[1]
+			log.Println(alarmName, alarmNameToIDMap[alarmName])
+			newMode := setAlarmStatusRegex.FindStringSubmatch(stringText)[2]
+			log.Println(newMode)
+			jsonString := fmt.Sprintf("{\"mode\":\"%s\"}", newMode)
+			var jsonStr = []byte(jsonString)
+			apiURL := fmt.Sprintf("http://%s:%d/devices/status/%s", botConfig.AlarmManager.Host, botConfig.AlarmManager.Port, alarmNameToIDMap[alarmName])
+			req, _ := http.NewRequest("PUT", apiURL, bytes.NewBuffer(jsonStr))
+			req.Header.Set("Content-Type", "application/json")
+
+			client := &http.Client{}
+			_, setNewModeErr := client.Do(req)
+
+			var response string
+			if setNewModeErr != nil {
+				response = fmt.Sprintf("Error setting Alarm mode: %s", setNewModeErr.Error())
+			} else {
+				response = fmt.Sprintf("%s set to %s.", alarmName, newMode)
+			}
+			bot.Send(m.Sender, response,
+				&tb.ReplyMarkup{
+					ReplyKeyboard: startBotReplyKeys,
+				})
+
+		}
+
+		if textMatch == false {
+			response := fmt.Sprintf("Sorry %s, I don't know what are you talking about.", senderName)
+			bot.Send(m.Sender, response,
+				&tb.ReplyMarkup{
+					ReplyKeyboard: startBotReplyKeys,
+				})
 		}
 	})
 
