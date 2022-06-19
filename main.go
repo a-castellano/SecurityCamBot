@@ -242,7 +242,7 @@ func main() {
 						})
 
 				} else {
-					snapshotJobSuccessResponse := fmt.Sprintf("Snapshot job for webcam called '%s', has been sended.", camName)
+					snapshotJobSuccessResponse := fmt.Sprintf("Snapshot job for webcam called '%s', has been sent.", camName)
 					log.Println(snapshotJobSuccessResponse)
 					bot.Send(m.Sender, snapshotJobSuccessResponse,
 						&tb.ReplyMarkup{
@@ -272,7 +272,7 @@ func main() {
 			manageSelectedAlarmBtnChangeName := fmt.Sprintf("Change %s status.", alarmName)
 			manageSelectedAlarmBtnChange := tb.ReplyButton{Text: manageSelectedAlarmBtnChangeName}
 			manageSelectedAlarmReplyButtons = append(manageSelectedAlarmReplyButtons, manageSelectedAlarmBtnChange)
-			response := "What do yuo want to do?"
+			response := "What do you want to do?"
 
 			manageSelectedAlarmReplyKeys := [][]tb.ReplyButton{manageSelectedAlarmReplyButtons}
 			bot.Send(m.Sender, response,
