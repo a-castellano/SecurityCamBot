@@ -41,6 +41,9 @@ name = "outgoing"
 [queues.alarmwatcher]
 name = "alarmwatcher"
 
+[queues.alarmsensor]
+name = "alarmsensor"
+
 [alarmmanager]
 host = "localhost"
 port = 3000

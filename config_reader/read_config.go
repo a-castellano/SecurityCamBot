@@ -73,7 +73,7 @@ func ReadConfig() (Config, error) {
 	webcamRequiredVariables := []string{"ip", "user", "password", "name"}
 	rabbitmqRequiredVariables := []string{"host", "port", "user", "password"}
 	alarmManagerRequiredVariables := []string{"host", "port"}
-	rabbitmqRequiredQueues := []string{"send_sanpshot_commands", "receive_sanpshot", "alarmwatcher"}
+	rabbitmqRequiredQueues := []string{"send_sanpshot_commands", "receive_sanpshot", "alarmwatcher", "alarmsensor"}
 
 	viper := viperLib.New()
 
