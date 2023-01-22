@@ -65,7 +65,7 @@ lint_code:
 integration_tests:
   stage: integration_tests
   services:
-    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202112131727
+    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202211011830
       alias: rabbitmq
   before_script:
     - export CC=/usr/bin/clang
@@ -130,7 +130,7 @@ scan:
 
 build_package:
   stage: build
-  image: registry.windmaker.net:5005/a-castellano/limani/base_deb_golang_1_17_builder:202112131727
+  image: registry.windmaker.net:5005/a-castellano/limani/base_deb_golang_1_19_builder:202211011830
   before_script:
     - export CC=/usr/bin/clang
     - export GOPATH="$(pwd)/go"
