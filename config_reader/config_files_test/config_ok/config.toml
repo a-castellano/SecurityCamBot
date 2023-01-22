@@ -5,10 +5,12 @@ token = "token"
 [telegram_bot.allowed_senders.alice]
 name = "Alice"
 id = 12
+receive_debug_messages = false
 
 [telegram_bot.allowed_senders.bob]
 name = "Bob"
 id = 13
+receive_debug_messages = true
 
 [webcams]
 [webcams.cam01]
@@ -38,6 +40,9 @@ name = "outgoing"
 
 [queues.alarmwatcher]
 name = "alarmwatcher"
+
+[queues.alarmsensor]
+name = "alarmsensor"
 
 [alarmmanager]
 host = "localhost"

@@ -237,8 +237,14 @@ func TestOKConfig(t *testing.T) {
 	if config.TelegramBot.AllowedSenders[12].Name != "Alice" {
 		t.Errorf("TelegramBot AllowedSenders with id 12 should be Alice. Returned: %s.", config.TelegramBot.AllowedSenders[12].Name)
 	}
+	if config.TelegramBot.AllowedSenders[12].SendDebug != false {
+		t.Errorf("TelegramBot AllowedSenders with id 12 SendDebug value should be false. Returned: true.")
+	}
 	if config.TelegramBot.AllowedSenders[13].Name != "Bob" {
 		t.Errorf("TelegramBot AllowedSenders with id 13 should be Bob. Returned: %s.", config.TelegramBot.AllowedSenders[12].Name)
+	}
+	if config.TelegramBot.AllowedSenders[13].SendDebug != true {
+		t.Errorf("TelegramBot AllowedSenders with id 13 SendDebug value should be true. Returned: false.")
 	}
 	if len(config.Webcams) != 2 {
 		t.Errorf("Config should contain 2 webcams. Returned: %d.", len(config.Webcams))

@@ -5,10 +5,12 @@ token = "token"
 [telegram_bot.allowed_senders.alice]
 name = "Alice"
 id = 12
+receive_debug_messages = false
 
 [telegram_bot.allowed_senders.bob]
 name = "Alice"
 id = 13
+receive_debug_messages = false
 
 [webcams]
 [webcams.cam01]

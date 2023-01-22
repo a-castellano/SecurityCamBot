@@ -12,6 +12,7 @@ import (
 
 	apiwatcher "github.com/a-castellano/AlarmStatusWatcher/apiwatcher"
 	"github.com/a-castellano/SecurityCamBot/alarmmanager"
+	"github.com/a-castellano/SecurityCamBot/alarmsensors"
 	config "github.com/a-castellano/SecurityCamBot/config_reader"
 	queues "github.com/a-castellano/SecurityCamBot/queues"
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -371,5 +372,6 @@ func main() {
 
 	go queues.ReceiveSnapshotJobs(botConfig.Rabbitmq, botConfig.Queues["receive_sanpshot"].Name, bot)
 	go alarmmanager.ReceiveAlarmMessages(botConfig.Rabbitmq, botConfig.TelegramBot.AllowedSenders, botConfig.Queues["alarmwatcher"].Name, bot)
+	go alarmsensors.ReceiveAlarmSensorMessages(botConfig.Rabbitmq, botConfig.TelegramBot.AllowedSenders, botConfig.Queues["alarmsensor"].Name, bot)
 	bot.Start()
 }

@@ -16,8 +16,9 @@ type TelegramBot struct {
 }
 
 type TelegramAllowedSender struct {
-	Name string
-	ID   int
+	Name      string
+	ID        int
+	SendDebug bool
 }
 
 type Rabbitmq struct {
@@ -68,11 +69,11 @@ func ReadConfig() (Config, error) {
 
 	requiredVariables := []string{"telegram_bot", "webcams", "rabbitmq"}
 	telegramBotVariables := []string{"token", "allowed_senders"}
-	allowedSendersVariables := []string{"name", "id"}
+	allowedSendersVariables := []string{"name", "id", "receive_debug_messages"}
 	webcamRequiredVariables := []string{"ip", "user", "password", "name"}
 	rabbitmqRequiredVariables := []string{"host", "port", "user", "password"}
 	alarmManagerRequiredVariables := []string{"host", "port"}
-	rabbitmqRequiredQueues := []string{"send_sanpshot_commands", "receive_sanpshot", "alarmwatcher"}
+	rabbitmqRequiredQueues := []string{"send_sanpshot_commands", "receive_sanpshot", "alarmwatcher", "alarmsensor"}
 
 	viper := viperLib.New()
 
@@ -139,6 +140,10 @@ func ReadConfig() (Config, error) {
 								return config, errors.New("Fatal error config: allowed sender " + sender_name + " name is repeated.")
 							} else {
 								readedNames[newSender.Name] = true
+							}
+						} else {
+							if required_sender_key == "receive_debug_messages" {
+								newSender.SendDebug = reflect.ValueOf(sender_info_value_map[required_sender_key]).Interface().(bool)
 							}
 						}
 					}
