@@ -31,6 +31,7 @@ func main() {
 	}
 
 	botConfig, errConfig := config.ReadConfig()
+	fmt.Println(botConfig.TelegramBot.AllowedSenders)
 	if errConfig != nil {
 		log.Fatal(errConfig)
 		return

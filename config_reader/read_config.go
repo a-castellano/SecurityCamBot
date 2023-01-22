@@ -141,16 +141,15 @@ func ReadConfig() (Config, error) {
 							} else {
 								readedNames[newSender.Name] = true
 							}
+						} else {
+							if required_sender_key == "receive_debug_messages" {
+								newSender.SendDebug = reflect.ValueOf(sender_info_value_map[required_sender_key]).Interface().(bool)
+							}
 						}
-						if required_sender_key == "receive_debug_messages" {
-							newSender.SendDebug = reflect.ValueOf(sender_info_value_map[required_sender_key]).Interface().(bool)
-						}
-
 					}
 				}
-
-				senders[newSender.ID] = newSender
 			}
+			senders[newSender.ID] = newSender
 		}
 	}
 
