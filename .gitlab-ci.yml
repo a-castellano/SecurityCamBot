@@ -65,7 +65,7 @@ lint_code:
 integration_tests:
   stage: integration_tests
   services:
-    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202301231808
+    - name: registry.windmaker.net:5005/a-castellano/limani/base_rabbitmq_server:202307300954
       alias: rabbitmq
   before_script:
     - export CC=/usr/bin/clang
