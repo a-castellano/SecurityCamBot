@@ -375,5 +375,6 @@ func main() {
 	go alarmmanager.ReceiveAlarmMessages(botConfig.Rabbitmq, botConfig.TelegramBot.AllowedSenders, botConfig.Queues["alarmwatcher"].Name, bot)
 	go alarmsensors.ReceiveAlarmSensorMessages(botConfig.Rabbitmq, botConfig.TelegramBot.AllowedSenders, botConfig.Queues["alarmsensor"].Name, bot)
 	go motion_watcher.ReceiveMotionSensorMessages(botConfig.Rabbitmq, botConfig.TelegramBot.AllowedSenders, botConfig.Queues["motion_sensor"].Name, bot)
+	go motion_watcher.ReceiveVideos(botConfig.Rabbitmq, botConfig.TelegramBot.AllowedSenders, botConfig.Queues["motion_video"].Name, bot)
 	bot.Start()
 }

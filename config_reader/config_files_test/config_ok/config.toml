@@ -47,6 +47,9 @@ name = "alarmsensor"
 [queues.motion_sensor]
 name = "motion_sensor"
 
+[queues.motion_video]
+name = "motion_video"
+
 [alarmmanager]
 host = "localhost"
 port = 3000
