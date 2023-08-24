@@ -2,7 +2,9 @@ package motion_watcher
 
 import (
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	config "github.com/a-castellano/SecurityCamBot/config_reader"
 	"github.com/streadway/amqp"
@@ -149,6 +151,15 @@ func ReceiveVideos(rabbitmqConfig config.Rabbitmq, allowedSenders map[int]config
 		for message := range messagesToProcess {
 
 			videoPathToSend := fmt.Sprintf("%s", message.Body)
+			// Do not send video until it is complete
+			for videoFileIsComplete := false; !videoFileIsComplete; {
+				videoFile, err := os.Stat(videoPathToSend)
+				if err == nil {
+					if time.Since(videoFile.ModTime()) > 5*time.Second {
+						videoFileIsComplete = true
+					}
+				}
+			}
 			videoToSend := &tb.Video{File: tb.FromDisk(videoPathToSend)}
 			message.Ack(false)
 			for _, userToNotify := range allowedSenders {
