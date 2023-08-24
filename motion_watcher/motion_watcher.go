@@ -155,8 +155,10 @@ func ReceiveVideos(rabbitmqConfig config.Rabbitmq, allowedSenders map[int]config
 			for videoFileIsComplete := false; !videoFileIsComplete; {
 				videoFile, err := os.Stat(videoPathToSend)
 				if err == nil {
-					if time.Since(videoFile.ModTime()) > 5*time.Second {
+					if time.Since(videoFile.ModTime()) > 10*time.Second {
 						videoFileIsComplete = true
+					} else {
+						time.Sleep(5 * time.Second)
 					}
 				}
 			}
