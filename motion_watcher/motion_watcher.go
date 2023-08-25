@@ -2,6 +2,7 @@ package motion_watcher
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -152,12 +153,17 @@ func ReceiveVideos(rabbitmqConfig config.Rabbitmq, allowedSenders map[int]config
 
 			videoPathToSend := fmt.Sprintf("%s", message.Body)
 			// Do not send video until it is complete
+			log.Println("Checking if ", videoPathToSend, " is complete.")
 			for videoFileIsComplete := false; !videoFileIsComplete; {
 				videoFile, err := os.Stat(videoPathToSend)
 				if err == nil {
-					if time.Since(videoFile.ModTime()) > 10*time.Second {
+					modified := time.Since(videoFile.ModTime())
+					log.Println(videoPathToSend, " was modified ", modified, " seconds ago.")
+					if time.Since(videoFile.ModTime()) > 16*time.Second {
+						log.Println(videoPathToSend, " is complete.")
 						videoFileIsComplete = true
 					} else {
+						log.Println(videoPathToSend, " is not complete.")
 						time.Sleep(5 * time.Second)
 					}
 				}
